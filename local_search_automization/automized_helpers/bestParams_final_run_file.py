@@ -86,7 +86,7 @@ def insert_problem_seed(final_list, problem_set):
 def clean_all_files(final_list):
     new_res = []
     args = ['neighborhood', 'numelites', 'inittemp', 'tempstep', 'tabusize', 'samples', 'initsolweight', 'alpha', 'rho',
-            'repsilon']
+            'epsilon']
     for problem in final_list:
         temp_prob = []
         for algo in problem:
@@ -94,8 +94,6 @@ def clean_all_files(final_list):
             for word in algo:
                 word = re.sub(r"[\']", "", word.strip())
                 if word in args:
-                    if word == 'repsilon':  # was a typo, next run remove 'r' from 'repsilon' and this if
-                        word = 'epsilon'
                     word = '-' + word
 
                 temp_algo.append(word)

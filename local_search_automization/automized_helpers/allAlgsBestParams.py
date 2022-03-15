@@ -1,11 +1,8 @@
-import math
 import subprocess
 import optuna
 from functools import partial
-import numpy as np
-import random
-import pandas as pd
-import os
+from concurrent.futures import ThreadPoolExecutor
+from queue import Queue
 
 
 def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo_seed, num_iterations):
@@ -44,8 +41,8 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         for algo in algorithms:
             run_optuna_func = partial(run_optuna, algo=algo, problem_seed=problem_seed, algo_seed=algo_seed)
             call_back_func = partial(print_best_callback, path=output_path, algo=algo, prob_seed=problem_seed)
-            study = optuna.create_study(direction='minimize')
-            study.optimize(run_optuna_func, n_trials=num_iterations, callbacks=[call_back_func])
+            study = optuna.create_study(study_name='test', direction='minimize')
+            study.optimize(run_optuna_func, n_trials=num_iterations, callbacks=[call_back_func], n_jobs=-1)  # -1 means maximum cpu capacity
             best_params_per_algo_temp.append((algo, problem_seed, algo_seed, study.best_trial.params))
         temp_arr.extend(best_params_per_algo_temp)
         with open(output_path + rf'bestParams_problem_{problem_seed}.txt', "w") as txt_file:
@@ -53,27 +50,55 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
                 txt_file.write(str(algo) + "," + str(best_params) + '\n')
 
 
+# def run_algs_with_optimal_params(run_file, path):
+#     run_array = []
+#     with open(run_file, "r") as f:
+#         for line in f:
+#             run_array.append(line.split(','))
+#
+#     for idx, params in enumerate(run_array):
+#         subprocess.run([path, *params])
+
+
+def best_params_worker(path, run_que):
+    while not run_que.empty():
+        params = run_que.get()
+        subprocess.run([path, *params])
+
+
 def run_algs_with_optimal_params(run_file, path):
-    run_array = []
+    run_que = Queue()
     with open(run_file, "r") as f:
         for line in f:
-            run_array.append(line.split(','))
+            run_que.put(line.split(','))
 
-    for idx, params in enumerate(run_array):
-        subprocess.run([path, *params])
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for _ in range(5):
+            executor.submit(best_params_worker, path, run_que)
+
+    # THREAD_COUNT = 4
+    # threads = []
+    # for _ in range(THREAD_COUNT):
+    #     threads.push(threading.Thread(target=worker, args=(path, run_array,))
+    #
+    # for _ in range(THREAD_COUNT):
+    #     threads.pop(0).join()
 
 
 if __name__ == '__main__':
     run_file = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\final_run.txt'
     path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearch.exe'
     output_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\\'
+    results_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Results\\'
 
     algorithms = ['GREAT_DELUGE', 'SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
                   'GREEDY+GREAT_DELUGE', 'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
                   'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']  # 1
+
     problem_seeds = ['182', '271', '291', '375', '390', '504', '549', '567', '643', '805', '1101', '1125', '2923',
                      '3562']
-    algo_seed = '331991908' # 4
+
+    algo_seed = '331991908'  # 4
     num_iterations = 20
 
     best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo_seed, num_iterations)

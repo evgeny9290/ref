@@ -45,10 +45,10 @@ class GradesVector:
             scalarizedVal += self.gradesVector[gradeIdx] * currWeight
             currWeight *= self.valuesRange[gradeIdx] + 1
 
-        return scalarizedVal
+        return abs(scalarizedVal)
 
     def __str__(self):
-        return f"gradeVector : {self.gradesVector}'\n'scalarization : {self.scalarize()}"
+        return f"gradeVector : {self.gradesVector} \nscalarization : {self.scalarize()}"
 
     @staticmethod
     def init_values_range():

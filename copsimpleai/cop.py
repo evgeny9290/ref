@@ -1,15 +1,16 @@
-from simpleai.search import SearchProblem
+from simpleaipack.search import SearchProblem
+from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing
 from fileReader import Reader
 from structClasses import *
 
 import numpy as np
-import pandas as pd
 from copy import deepcopy
 from time import time
 
 
 class COP(SearchProblem):
     def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, initialSolution=None, loadProblemFromFile=True):
+        self.availableStatesSize = 50
         self.problemSeed = problemSeed
         self.path = path
         self.numOfVarChangesInNeighborhood = numOfVarChangesInNeighborhood
@@ -25,11 +26,12 @@ class COP(SearchProblem):
         else:
             self.reader = Reader(self.path, self.problemSeed)
             self.valuesPerVariables = self.reader.valuesPerVariable
-            self.binaryConstraintsMatrix = self.reader.binaryConstraintsMatrix
+            padding_with_zeroes = MAX_TOTAL_VALUES * MAX_TOTAL_VALUES - len(self.reader.binaryConstraintsMatrix)
+            self.binaryConstraintsMatrix = np.pad(self.reader.binaryConstraintsMatrix, (0, padding_with_zeroes))
             self.maxValuesNum = self.reader.maxValuesNum
             self.Ms = self.reader.MS
 
-        super().__init__(initial_state=self.initialSolution.solutionVector)
+        super().__init__(initial_state=self.initialSolution)
 
     @staticmethod
     def binConsIdx(x, y):
@@ -111,10 +113,37 @@ class COP(SearchProblem):
 
         return outputEvaluation
 
+    def actions(self, state):
+        actions = []
+        for action in range(self.availableStatesSize):  # change (rand_idx, rand_val)
+            change = []
+            for var in range(self.numOfVarChangesInNeighborhood):
+                rand_entry = np.random.randint(0, self.valuesPerVariables.validVarAmount)
+                rand_val = np.random.randint(0, self.valuesPerVariables.varsData[rand_entry].valuesAmount)
+                change.append((rand_entry, rand_val))
+            actions.append(change)
+
+        return actions
+
+    def result(self, state, action):
+        newState = deepcopy(state)
+        for idx, val in action:
+            newState.solutionVector[idx] = val
+
+        return newState
+
+    def value(self, state):
+        evaluation = self.evaluateSolution(state)
+        return evaluation.scalarize()
+
+    def generate_random_state(self):
+        return self.generateSingleNeighbor(self.initialSolution)
+
 
 if __name__ == '__main__':
     path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
     problem_seed = 500
+    algo_seed = 100
     time_begining_init = time()
     copProblem = COP(problemSeed=problem_seed,
                      numOfVarChangesInNeighborhood=5,
@@ -123,33 +152,15 @@ if __name__ == '__main__':
                      loadProblemFromFile=True)
 
     print(f"init time: {time() - time_begining_init}")
-
-    rest_time = time()
-    print(copProblem.valuesPerVariables.varsData[0].valuesQ)
-    print()
-    initialSolution = SolutionVector()
-    print(initialSolution)
-    print()
-    generated_neighbor = copProblem.generateSingleNeighbor(initialSolution)
-    print(generated_neighbor)
-    print()
-    evaluate_sol = copProblem.evaluateSolution(generated_neighbor)
-    print(evaluate_sol)
-    print()
-    print(f"rest time: {time() - rest_time}")
-    #
+    problem = copProblem
     # time_begining_init = time()
-    # xxx = SolutionVector()
-    # xxx.solutionVector = np.array([np.random.randint(1, 10) for _ in range(MAX_NUM_OF_VARS)])
-    # print(xxx)
-    # copProblem_fromInitial = COP(9, 3, xxx)
-    # print(f"init time: {time() - time_begining_init}")
-
-
-    # print(copProblem_fromInitial.Ms[7].amount)
-    # print(copProblem_fromInitial.varsData[0].valuesQ[:5])
-    # print(copProblem_fromInitial.varsData[0]['valuesQ'])
-    # print(len(copProblem_fromInitial.varsData[0]))
-    # print(len(copProblem_fromInitial.varsData[0]['valuesQ']))
-    # print()
-    # print(copProblem_fromInitial.varsData[0]['ucPrion'])
+    # result = hill_climbing_stochastic(problem, iterations_limit=200, max_run_time=10, seed=algo_seed)
+    time_begining_init = time()
+    # result = simulated_annealing(problem, iterations_limit=1120, max_run_time=10, seed=algo_seed)
+    result = beam_best_first(problem, beam_size=100, iterations_limit=2000, max_run_time=10, seed=algo_seed)
+    print(f"algo run time: {time() - time_begining_init}")
+    print(result)
+    print(type(result))
+    print(result.value)
+    print(result.state)
+    print(problem.evaluateSolution(result.state).scalarize())

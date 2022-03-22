@@ -22,18 +22,23 @@ class A:
 if __name__ == '__main__':
     # x = A()
     # print(x.cx['bx'])
-    path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
-    files = os.listdir(path)
-    print(files)
-    first_bin_max = files[0]
-    print(first_bin_max)
+    # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
+    # files = os.listdir(path)
+    # print(files)
+    # first_bin_max = files[0]
+    # print(first_bin_max)
+    #
+    # with open(path + first_bin_max) as f:
+    #     x = np.array(f.read().split(), dtype=np.int16)
+    #
+    # print(type(x), x.shape)
+    # print(x[:20], type(x[2]), x[1], x[12312])
 
-    with open(path + first_bin_max) as f:
-        x = np.array(f.read().split(), dtype=np.int16)
 
-    print(type(x), x.shape)
-    print(x[:20], type(x[2]), x[1], x[12312])
 
+    x = np.array([3,4,4,1,1,4,0,4,3,0], dtype=np.int16)
+    padded = np.pad(x,(0,5))
+    print(padded)
     # def __init__(self, ucPrion, valuesAmount, valuedVarAmount=1):
         # self.VarData.__init__(self, ucPrion, valuesAmount)
         # self.dt = np.dtype([('ucPrion', np.int32, ),

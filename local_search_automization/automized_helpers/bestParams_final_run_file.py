@@ -39,6 +39,7 @@ def read_all_files(files, target_location):
             generic_name = file
             get_number = generic_name.split('_')[2][:-4]
             num_array.append(get_number)
+
     num_array = sorted(num_array, key=lambda x: int(x))
 
     files = [files[0][:19] + prob + '.txt' for prob in num_array]
@@ -72,13 +73,12 @@ def convert_all_to_3d_list(all_params):
     return res
 
 
-def insert_problem_seed(final_list, problem_set):
-    run_time = '1.0'
+def insert_problem_seed(final_list, problem_set, run_time):
     algo_seed = '331991908'
     for file, problem in zip(final_list,problem_set):
         for algo in file:
             algo.insert(1, problem)
-            algo.insert(2, run_time)
+            algo.insert(2, str(run_time))
             algo.insert(3, algo_seed)
     return final_list
 
@@ -102,22 +102,23 @@ def clean_all_files(final_list):
     return new_res
 
 
-def write_clean_res_to_file(clean_res, target_location):
-    with open(target_location + 'final_run.txt', "w") as f:
+def write_clean_res_to_file(clean_res, target_location, python):
+    target_name = target_location + 'python_final_run.txt' if python else target_location + 'final_run.txt'
+    with open(target_name, "w") as f:
         for file in clean_res:
             for algo in file:
                 f.write((",").join(algo) + '\n')
 
 
-def automize_final_run_file(target_location, problem_set):
+def automize_final_run_file(target_location, problem_set, python=False, run_time='1.0'):
     best_params, best_params_init_greedy = read_files_to_arrays(target_location)
     merge_files_into_initial(best_params, best_params_init_greedy, target_location)
     all_params = read_all_files(best_params, target_location)
     params_per_problem_set = convert_to_list_of_files(all_params)
     final_list = convert_all_to_3d_list(params_per_problem_set)
-    final_list = insert_problem_seed(final_list, problem_set)
+    final_list = insert_problem_seed(final_list, problem_set, run_time)
     final_list = clean_all_files(final_list)
-    write_clean_res_to_file(final_list, target_location)
+    write_clean_res_to_file(final_list, target_location, python)
 
 
 if __name__ == '__main__':

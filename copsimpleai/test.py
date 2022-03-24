@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import sys, pprint
 
 class A:
     XY = 5
@@ -20,6 +21,7 @@ class A:
 
 
 if __name__ == '__main__':
+    pprint.pprint(sys.path)
     # x = A()
     # print(x.cx['bx'])
     # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
@@ -36,9 +38,9 @@ if __name__ == '__main__':
 
 
 
-    x = np.array([3,4,4,1,1,4,0,4,3,0], dtype=np.int16)
-    padded = np.pad(x,(0,5))
-    print(padded)
+    # x = np.array([3,4,4,1,1,4,0,4,3,0], dtype=np.int16)
+    # padded = np.pad(x,(0,5))
+    # print(padded)
     # def __init__(self, ucPrion, valuesAmount, valuedVarAmount=1):
         # self.VarData.__init__(self, ucPrion, valuesAmount)
         # self.dt = np.dtype([('ucPrion', np.int32, ),

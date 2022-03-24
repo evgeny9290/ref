@@ -55,7 +55,7 @@ def create_expected_df_all_algs_arr(all_problems_optuna_one_alg, num_iterations)
     return expected_df_all_algs
 
 
-def expected_graph_optuna_parametrization(expected_df_all_algs):
+def expected_graph_optuna_parametrization(expected_df_all_algs, python):
     sns.set(rc={'figure.figsize':(20.7,12.27)})
 
     for df in expected_df_all_algs:
@@ -75,22 +75,32 @@ def expected_graph_optuna_parametrization(expected_df_all_algs):
         plt.ylabel('best_quality', fontsize=18, rotation='horizontal',loc='center')
         plt.title('Expected Graph Optuna', fontsize=18)
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
-    plt.savefig(fr'graphs\Expected_Graph_Optuna_all_algs.png')
+    if python:
+        plt.savefig(fr'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\Python_Expected_Graph_Optuna_all_algs.png')
+    else:
+        plt.savefig(fr'graphs\Expected_Graph_Optuna_all_algs.png')
     plt.clf()
 
 
-def automize_optuna_expected_graph(path, num_algs, num_problems, num_iterations):
+def automize_optuna_expected_graph(path, num_algs, num_problems, num_iterations, python=False):
     best_val_all_algos = read_best_vals_files_to_array(path)
     all_algs_optuna_dfs = convert_to_dfs(best_val_all_algos, path)
     all_problems_optuna_one_alg = all_probs_one_alg(all_algs_optuna_dfs, num_algs, num_problems)
     expected_df_all_algs = create_expected_df_all_algs_arr(all_problems_optuna_one_alg, num_iterations)
-    expected_graph_optuna_parametrization(expected_df_all_algs)
+    expected_graph_optuna_parametrization(expected_df_all_algs, python)
 
 
 if __name__ == '__main__':
-    path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\best_values_for_algs\\'
-    num_algos = 18
-    num_problems = 14
-    num_iterations = 20
+    # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\best_values_for_algs\\'
+    # num_algos = 18
+    # num_problems = 14
+    # num_iterations = 20
+    #
+    # automize_optuna_expected_graph(path, num_algos, num_problems, num_iterations)
 
-    automize_optuna_expected_graph(path, num_algos, num_problems, num_iterations)
+    python_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_output\best_values_for_algs\\'
+    python_num_algos = 3
+    python_num_problems = 14
+    python_num_iterations = 8
+
+    automize_optuna_expected_graph(python_path, python_num_algos, python_num_problems, python_num_iterations, python=True)

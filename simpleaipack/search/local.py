@@ -4,6 +4,7 @@ from simpleai.search.models import SearchNodeValueOrdered
 import math
 import random
 import datetime
+# import numpy as np
 
 
 def _all_expander(fringe, iteration, viewer):
@@ -173,7 +174,15 @@ def _exp_schedule(iteration, k=20, lam=0.005, limit=100):
     return k * math.exp(-lam * iteration)
 
 
-def _create_simulated_annealing_expander(schedule, seed):
+# custom init_temp and temp_step
+def _custom_exp_schedule(temperature, temperature_step):
+    '''
+    Possible scheduler for simulated_annealing, based on the aima example.
+    '''
+    return temperature / temperature_step
+
+
+def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     '''
     Creates an expander that has a random chance to choose a node that is worse
     than the current (first) node, but that chance decreases with time.
@@ -191,6 +200,7 @@ def _create_simulated_annealing_expander(schedule, seed):
         if neighbors:
             succ = random.choice(neighbors)
             delta_e = succ.value - current.value
+
             if delta_e > 0 or random.random() < math.exp(delta_e / T):
                 fringe.pop()
                 fringe.append(succ)
@@ -201,7 +211,11 @@ def _create_simulated_annealing_expander(schedule, seed):
     return _expander
 
 
-def simulated_annealing(problem, schedule=_exp_schedule, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
+# schedule=_exp_schedule
+def simulated_annealing(problem, schedule=_exp_schedule,
+                        iterations_limit=0, viewer=None,
+                        max_run_time=1, seed=0,
+                        initTemp=10, tempStep=1):
     '''
     Simulated annealing.
 
@@ -214,7 +228,7 @@ def simulated_annealing(problem, schedule=_exp_schedule, iterations_limit=0, vie
     SearchProblem.value.
     '''
     return _local_search(problem,
-                         _create_simulated_annealing_expander(schedule,seed),
+                         _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep),
                          iterations_limit=iterations_limit,
                          fringe_size=1,
                          stop_when_no_better=iterations_limit==0,
@@ -309,6 +323,9 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     run = True
     best = None
     stop = datetime.datetime.now() + datetime.timedelta(seconds=max_run_time)
+    # cur_temp = initTemp / tempStep
+    array_of_best_solutions_values = []
+    array_of_times = []
     while run and datetime.datetime.now() < stop:
         if viewer:
             viewer.event('new_iteration', list(fringe))
@@ -316,7 +333,9 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         old_best = fringe[0]
         fringe_expander(fringe, iteration, viewer)
         best = fringe[0]
-
+        # print(best)
+        array_of_best_solutions_values.append(best.value)
+        array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 
         if iterations_limit and iteration >= iterations_limit:
@@ -328,5 +347,21 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
 
     if viewer:
         viewer.event('finished', fringe, best, 'returned after %s' % finish_reason)
+
+    #########################################################################################
+    ############# writing info to files #####################################################
+    #########################################################################################
+
+    min_time = min(array_of_times)
+    array_of_times = list(map(lambda x: x + abs(min_time), array_of_times))[::-1]
+    path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results'
+
+    with open(path + "\Times_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(problem.algoSeed) + ".txt", 'w') as f:
+        for line in array_of_times:
+            f.write(str(line)+'\n')
+
+    with open(path + "\BestValue_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(problem.algoSeed) + ".txt", 'w') as f:
+        for line in array_of_best_solutions_values:
+            f.write(str(line)+'\n')
 
     return best

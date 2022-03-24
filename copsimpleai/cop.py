@@ -9,8 +9,10 @@ from time import time
 
 
 class COP(SearchProblem):
-    def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, initialSolution=None, loadProblemFromFile=True):
+    def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, algoName, algoSeed, initialSolution=None, loadProblemFromFile=True):
         self.availableStatesSize = 50
+        self.algoName = algoName
+        self.algoSeed = algoSeed
         self.problemSeed = problemSeed
         self.path = path
         self.numOfVarChangesInNeighborhood = numOfVarChangesInNeighborhood
@@ -140,27 +142,27 @@ class COP(SearchProblem):
         return self.generateSingleNeighbor(self.initialSolution)
 
 
-if __name__ == '__main__':
-    path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
-    problem_seed = 500
-    algo_seed = 100
-    time_begining_init = time()
-    copProblem = COP(problemSeed=problem_seed,
-                     numOfVarChangesInNeighborhood=5,
-                     path=path,
-                     initialSolution=None,
-                     loadProblemFromFile=True)
-
-    print(f"init time: {time() - time_begining_init}")
-    problem = copProblem
+# if __name__ == '__main__':
+    # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
+    # problem_seed = 500
+    # algo_seed = 100
     # time_begining_init = time()
-    # result = hill_climbing_stochastic(problem, iterations_limit=200, max_run_time=10, seed=algo_seed)
-    time_begining_init = time()
-    # result = simulated_annealing(problem, iterations_limit=1120, max_run_time=10, seed=algo_seed)
-    result = beam_best_first(problem, beam_size=100, iterations_limit=2000, max_run_time=10, seed=algo_seed)
-    print(f"algo run time: {time() - time_begining_init}")
-    print(result)
-    print(type(result))
-    print(result.value)
-    print(result.state)
-    print(problem.evaluateSolution(result.state).scalarize())
+    # copProblem = COP(problemSeed=problem_seed,
+    #                  numOfVarChangesInNeighborhood=5,
+    #                  path=path,
+    #                  initialSolution=None,
+    #                  loadProblemFromFile=True)
+    #
+    # print(f"init time: {time() - time_begining_init}")
+    # problem = copProblem
+    # time_begining_init = time()
+    # # result = hill_climbing_stochastic(problem, iterations_limit=200, max_run_time=20, seed=algo_seed)
+    # result = simulated_annealing(problem, iterations_limit=1120, max_run_time=20, seed=algo_seed, initTemp=5, tempStep=4)
+    # # result = beam_best_first(problem, beam_size=100, iterations_limit=2000, max_run_time=20, seed=algo_seed)
+    # print(f"algo run time: {time() - time_begining_init}")
+    # print(result)
+    # print(type(result))
+    # print(result.value)
+    # print(result.state)
+    # print(problem.evaluateSolution(result.state).scalarize())
+    # print('hello')

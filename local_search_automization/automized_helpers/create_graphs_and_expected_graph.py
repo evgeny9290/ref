@@ -157,7 +157,7 @@ def insert_row_if_early_finish(all_probs_algs):
     return all_probs_algs
 
 
-def graph_for_all_problems(all_probs_algs, problem_seeds):
+def graph_for_all_problems(all_probs_algs, problem_seeds, python):
     sns.set(rc={'figure.figsize':(20.7,12.27)})
 
     for problem, problem_seed in zip(all_probs_algs,problem_seeds):
@@ -176,7 +176,10 @@ def graph_for_all_problems(all_probs_algs, problem_seeds):
             plt.ylabel('quality', fontsize=18, rotation='horizontal')
             plt.title(f'problem seed: {problem_seed}', fontsize=18)
         plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
-        plt.savefig(fr'graphs\problem_num_{problem_seed}.png')
+        if python:
+            plt.savefig(fr'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\problem_num_{problem_seed}.png')
+        else:
+            plt.savefig(fr'graphs\problem_num_{problem_seed}.png')
         plt.clf()
 
 
@@ -211,13 +214,16 @@ def algo_for_prob_matrix(all_probs_algs, num_problems, num_algos):
 
 def fix_dim_all_probs_all_algs_inplace(same_algs_all_probs, max_len_df_per_algo):
     for idx_alg , (alg, max_len_for_algo) in enumerate(zip(same_algs_all_probs, max_len_df_per_algo)):
+        # print(max_len_for_algo)
         for idx_df, df in enumerate(alg):
+            # print(df)
             len_to_add = max_len_for_algo - len(df)
             new_series_col1 = [df.iloc[-1][0]] * len_to_add
             new_series_col2 = [1] * len_to_add
             new_df = pd.DataFrame({df.columns[0]: new_series_col1, df.columns[1]: new_series_col2})
             same_algs_all_probs[idx_alg][idx_df] = pd.concat([df, new_df], ignore_index=True)
-            df.to_csv(fr'dataframes\df_{df.columns[0]}_{idx_df}.csv', index=False)
+            # print(same_algs_all_probs[idx_alg][idx_df])
+            same_algs_all_probs[idx_alg][idx_df].to_csv(fr'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\dataframes\df_{df.columns[0]}_{idx_df}.csv', index=False)
 
 
 def create_expected_dfs_all_algs(same_dim_benchmark):
@@ -232,13 +238,13 @@ def create_expected_dfs_all_algs(same_dim_benchmark):
     return expected_df_all_algs
 
 
-def time_smoothing_for_expected_dfs(extra_backup_after_normalize, max_len_df_per_algo):
+def time_smoothing_for_expected_dfs(extra_backup_after_normalize, max_len_df_per_algo, run_time):
     for algo, max_len in zip(extra_backup_after_normalize, max_len_df_per_algo):
         col_time = algo.columns[1]
         try:
-            algo[col_time] = np.arange(0, 1, 1 / max_len)
+            algo[col_time] = np.arange(0, run_time, run_time / max_len)
         except:
-            algo[col_time] = np.arange(0, 1, 1 / max_len)[:-1]
+            algo[col_time] = np.arange(0, run_time, run_time / max_len)[:-1]
 
 
 def rename_df_cols_inplace(same_dim_benchmark_after_normalize_fixed_time):
@@ -249,14 +255,16 @@ def rename_df_cols_inplace(same_dim_benchmark_after_normalize_fixed_time):
         df.rename(columns={col1: new_col1_name, col2: new_col2_name}, inplace=True)
 
 
-def expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time):
+def expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time, python):
     for expected_df in same_dim_benchmark_after_normalize_fixed_time:
-        expected_df.to_csv(fr'dataframes\expected_dataframes\expected_df{expected_df.columns[0]}.csv',index=False)
+        if python:
+            expected_df.to_csv(fr'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\dataframes\expected_dataframes\expected_df{expected_df.columns[0]}.csv', index=False)
+        else:
+            expected_df.to_csv(fr'dataframes\expected_dataframes\expected_df{expected_df.columns[0]}.csv', index=False)
 
 
-def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time):
+def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python):
     sns.set(rc={'figure.figsize':(20.7,12.27)})
-
     for df in same_dim_benchmark_after_normalize_fixed_time:
         col1, col2 = df.columns[0], df.columns[1]
         name_arr = col1.split('_')
@@ -274,7 +282,10 @@ def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time):
         plt.ylabel('quality', fontsize=18, rotation='horizontal')
         plt.title('Expected Graph', fontsize=18)
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
-    plt.savefig(fr'graphs\Expected_Graph.png')
+    if python:
+        plt.savefig(fr'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\Python_Expected_Graph.png')
+    else:
+        plt.savefig(fr'graphs\Expected_Graph.png')
     plt.clf()
 
 
@@ -286,7 +297,7 @@ def sanity_check_file_names(best_val_files, time_files):
             print(val_file, time_file)
 
 
-def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs):
+def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python):
     initial_greedy_best_val_files, with_greedy_best_vals_files, best_val_files, initial_greedy_time_files, with_greedy_time_files, time_files = fill_arrays_with_file_names_initial(path)
     remove_unused_files(path)
     merge_files_into_initial(with_greedy_best_vals_files, initial_greedy_best_val_files, with_greedy_time_files, initial_greedy_time_files, path)
@@ -304,13 +315,13 @@ def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print
     all_probs_algs = insert_row_if_early_finish(all_probs_algs)
 
     if print_all_graphs:
-        graph_for_all_problems(all_probs_algs, problem_seeds)
+        graph_for_all_problems(all_probs_algs, problem_seeds, python)
 
     return all_probs_algs
 
 
-def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_all_graphs):
-    all_probs_algs = automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs)
+def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_all_graphs, python=False, run_time=1.0):
+    all_probs_algs = automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python)
     len_dfs = prob_algo_len_matrix(all_probs_algs, num_problems, num_algos)
     max_len_df_per_algo = max_len_df_foreach_algo(len_dfs, num_problems, num_algos)
     same_algs_all_probs = algo_for_prob_matrix(all_probs_algs, num_problems, num_algos)
@@ -318,12 +329,12 @@ def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_
     same_dim_benchmark = deepcopy(same_algs_all_probs)
     expected_df_all_algs = create_expected_dfs_all_algs(same_dim_benchmark)
     same_dim_benchmark_after_normalize = deepcopy(expected_df_all_algs)
-    time_smoothing_for_expected_dfs(same_dim_benchmark_after_normalize, max_len_df_per_algo)
+    time_smoothing_for_expected_dfs(same_dim_benchmark_after_normalize, max_len_df_per_algo, run_time)
     same_dim_benchmark_after_normalize_fixed_time = deepcopy(same_dim_benchmark_after_normalize)
     rename_df_cols_inplace(same_dim_benchmark_after_normalize_fixed_time)
-    expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time)
+    expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time, python)
 
-    expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time)
+    expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python)
 
 
 if __name__ == '__main__':

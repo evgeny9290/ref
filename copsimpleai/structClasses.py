@@ -34,7 +34,7 @@ class SolutionVector:
 class GradesVector:
     def __init__(self):
         self.valuesRange = self.init_values_range()
-        self.gradesVector = np.zeros(shape=MAX_LENGTH_OF_GRADES_VECTOR, dtype=np.float32)
+        self.gradesVector = np.zeros(shape=MAX_LENGTH_OF_GRADES_VECTOR, dtype=np.int32)
 
     def scalarize(self):
         scalarizedVal = np.float64(0)

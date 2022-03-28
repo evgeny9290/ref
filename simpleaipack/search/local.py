@@ -4,7 +4,7 @@ from simpleai.search.models import SearchNodeValueOrdered
 import math
 import random
 import datetime
-# import numpy as np
+import numpy as np
 
 
 def _all_expander(fringe, iteration, viewer):
@@ -174,14 +174,6 @@ def _exp_schedule(iteration, k=20, lam=0.005, limit=100):
     return k * math.exp(-lam * iteration)
 
 
-# custom init_temp and temp_step
-def _custom_exp_schedule(temperature, temperature_step):
-    '''
-    Possible scheduler for simulated_annealing, based on the aima example.
-    '''
-    return temperature / temperature_step
-
-
 def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     '''
     Creates an expander that has a random chance to choose a node that is worse
@@ -190,7 +182,7 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     random.seed(seed)
 
     def _expander(fringe, iteration, viewer):
-        T = schedule(iteration)
+        T = schedule(iteration, k=initTemp, lam=tempStep)
         current = fringe[0]
         neighbors = current.expand(local_search=True)
 
@@ -201,7 +193,7 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
             succ = random.choice(neighbors)
             delta_e = succ.value - current.value
 
-            if delta_e > 0 or random.random() < math.exp(delta_e / T):
+            if delta_e > 0 or random.random() < np.float64(math.exp(np.float64(-abs(delta_e / T)))):
                 fringe.pop()
                 fringe.append(succ)
 
@@ -300,6 +292,22 @@ def genetic(problem, population_size=100, mutation_chance=0.1,
                          viewer=viewer)
 
 
+def writeResults(path, time_array, best_val_array, problem):
+    min_time = min(time_array)
+    array_of_times = list(map(lambda x: x + abs(min_time), time_array))[::-1]
+    best_val_array = sorted(best_val_array, key=lambda x: x[1])
+
+    with open(path + "\Times_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(
+            problem.algoSeed) + ".txt", 'w') as f:
+        for line in array_of_times:
+            f.write(str(line) + '\n')
+
+    with open(path + "\BestValue_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(
+            problem.algoSeed) + ".txt", 'w') as f:
+        for vec, value in best_val_array:
+            f.write(str(value) + '\n')
+
+
 def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
                   random_initial_states=False, stop_when_no_better=True,
                   viewer=None, max_run_time=1):
@@ -323,7 +331,6 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     run = True
     best = None
     stop = datetime.datetime.now() + datetime.timedelta(seconds=max_run_time)
-    # cur_temp = initTemp / tempStep
     array_of_best_solutions_values = []
     array_of_times = []
     while run and datetime.datetime.now() < stop:
@@ -333,8 +340,8 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         old_best = fringe[0]
         fringe_expander(fringe, iteration, viewer)
         best = fringe[0]
-        # print(best)
-        array_of_best_solutions_values.append(best.value)
+
+        array_of_best_solutions_values.append((best, best.value))
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 
@@ -352,16 +359,9 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     ############# writing info to files #####################################################
     #########################################################################################
 
-    min_time = min(array_of_times)
-    array_of_times = list(map(lambda x: x + abs(min_time), array_of_times))[::-1]
     path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results'
+    writeResults(path, array_of_times, array_of_best_solutions_values, problem)
 
-    with open(path + "\Times_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(problem.algoSeed) + ".txt", 'w') as f:
-        for line in array_of_times:
-            f.write(str(line)+'\n')
-
-    with open(path + "\BestValue_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(problem.algoSeed) + ".txt", 'w') as f:
-        for line in array_of_best_solutions_values:
-            f.write(str(line)+'\n')
-
-    return best
+    # return best
+    best_res = max(array_of_best_solutions_values, key=lambda x: x[1])
+    return best_res[0]

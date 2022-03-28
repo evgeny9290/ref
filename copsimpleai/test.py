@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 import sys, pprint
+import math
 
 class A:
     XY = 5
@@ -21,7 +22,16 @@ class A:
 
 
 if __name__ == '__main__':
-    pprint.pprint(sys.path)
+    x = ["asdasda_11", "asdasdaaaaaa_22"]
+    res = []
+    for _ in x:
+        r = []
+        for i in range(4):
+            r.append(i)
+        res.append(r)
+    print(res)
+    # print(math.exp(-91234123912312 / 0.00000000000001))
+    # pprint.pprint(sys.path)
     # x = A()
     # print(x.cx['bx'])
     # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'

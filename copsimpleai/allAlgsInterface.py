@@ -69,7 +69,7 @@ if __name__ == '__main__':
                       initialSolution=None,
                       loadProblemFromFile=True)
         result = simulated_annealing(problem, iterations_limit=2000, max_run_time=float(run_time),
-                                     seed=int(algo_seed), initTemp=int(initTemp), tempStep=int(tempStep))
+                                     seed=int(algo_seed), initTemp=float(initTemp), tempStep=float(tempStep))
     if sys.argv[1] == "LBS":
         neighborhood = 0
         args_list = sys.argv
@@ -93,28 +93,3 @@ if __name__ == '__main__':
         result = beam_best_first(problem, iterations_limit=2000, max_run_time=float(run_time), seed=int(algo_seed))
 
     print(f"Results for ParamILS: SAT, -1, {problem_seed}, {result.value}, {algo_seed}")
-
-
-    # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
-    # problem_seed = 500
-    # algo_seed = 100
-    # time_begining_init = time()
-    # copProblem = COP(problemSeed=problem_seed,
-    #                  numOfVarChangesInNeighborhood=5,
-    #                  path=path,
-    #                  initialSolution=None,
-    #                  loadProblemFromFile=True)
-    #
-    # print(f"init time: {time() - time_begining_init}")
-    # problem = copProblem
-    # time_begining_init = time()
-    # # result = hill_climbing_stochastic(problem, iterations_limit=200, max_run_time=20, seed=algo_seed)
-    # result = simulated_annealing(problem, iterations_limit=1120, max_run_time=20, seed=algo_seed, initTemp=5,
-    #                              tempStep=4)
-    # # result = beam_best_first(problem, beam_size=100, iterations_limit=2000, max_run_time=20, seed=algo_seed)
-    # print(f"algo run time: {time() - time_begining_init}")
-    # print(result)
-    # print(type(result))
-    # print(result.value)
-    # print(result.state)
-    # print(problem.evaluateSolution(result.state).scalarize())

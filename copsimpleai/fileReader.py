@@ -4,9 +4,22 @@ import os
 
 from structClasses import ValuesPerVars, M, MAX_NUM_OF_MS
 
+"""
+class responsible for reading a COP problem Created into appropriate fields.
+"""
+
 
 class Reader:
     def __init__(self, path, problem_seed):
+        """Creates Reader class for reading COP problem of for a given problem seed.
+
+        Args:
+            path (str): path to the folder which contains all the files needed to initialize a COP problem created.
+            problem_seed (int): COP problem seed number.
+
+        Returns:
+             None.
+        """
         self.path = path
         self.problem_seed = problem_seed
         self.valuesPerVariable = ValuesPerVars()
@@ -15,6 +28,15 @@ class Reader:
         self.ValuesPerVariable_reader()
 
     def matrix_reader(self):
+        """Reading the BinaryConstraintsMatrix_ text file for the problem seed
+         and returning it as numpy 1d array of type int.
+
+        Args:
+            None.
+
+        Returns:
+             list[int]: constrains matrix represented as 1d array. same as in localsearch.h file.
+        """
         files = os.listdir(self.path)
         for file in files:
             if file == "BinaryConstraintsMatrix_" + str(self.problem_seed) + ".txt":
@@ -23,6 +45,15 @@ class Reader:
         return bin_mat
 
     def MS_maxValuesNum_reader(self):
+        """Reading Ms_ text file for the problem seed and initializing req fields.
+        all according to the initialization in localsearch.h file from CPP.
+
+        Args:
+            None.
+
+        Returns:
+            (int, list[M]): maximum value number, array of M classes of length MAX_NUM_OF_MS already initialized.
+        """
         files = os.listdir(self.path)
         for file in files:
             if file == "Ms_" + str(self.problem_seed) + ".txt":
@@ -40,6 +71,15 @@ class Reader:
         return maxValuesNum, MS_class_array
 
     def ValuesPerVariable_reader(self):
+        """Reading ValuesPerVariable_ cvs file as DataFrame.
+        Initializing valuesPerVariable Data with numpy 1d arrays of type int where needed and ints otherwise.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+        """
         files = os.listdir(self.path)
         vpvFile = None
         for file in files:
@@ -57,22 +97,6 @@ class Reader:
             self.valuesPerVariable.varsData[idx].ucPrio = np.int16(valid_info_for_idx['ucPrio'].iloc[0])
             self.valuesPerVariable.varsData[idx].valuesAmount = np.int16(valid_info_for_idx['ulValuesAmount'].iloc[0])
 
-
-if __name__ == '__main__':
-    path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
-    r = Reader(path=path, problem_seed=500)
-    r.ValuesPerVariable_reader()
-    # print(type(r.binaryConstraintsMatrix), r.binaryConstraintsMatrix.shape)
-    # print(r.binaryConstraintsMatrix[:20], type(r.binaryConstraintsMatrix[2]), r.binaryConstraintsMatrix[1], r.binaryConstraintsMatrix[12312])
-    # print(r.maxValuesNum, r.MS)
-    # print("valuespervariable info")
-    # print(r.valuesPerVariable.varsData[0].valuesB)
-    # print(r.valuesPerVariable.varsData[0].valuesP)
-    # print(r.valuesPerVariable.varsData[0].valuesM)
-    # print(r.valuesPerVariable.varsData[0].valuesQ)
-    # print(r.valuesPerVariable.varsData[0].valuesAmount)
-    # print(r.valuesPerVariable.varsData[0].ucPrio)
-    # print(r.valuesPerVariable.varsData[17].ucPrio)
 
 
 

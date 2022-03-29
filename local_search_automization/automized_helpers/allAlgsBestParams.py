@@ -17,8 +17,8 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         output_path (str): path to the folder which will store the .txt files with optimal parameters
             for each problem seed for each algorithm.
         algorithms (list[str]): list of algorithm names that are required to run.
-        problem_seeds (list[int]): seed numbers representing the given problems.
-        algo_seed (int): seed number representing the stochastic behaviour of an algorithm.
+        problem_seeds (list[str]): seed numbers representing the given problems.
+        algo_seed (str): seed number representing the stochastic behaviour of an algorithm.
         num_iterations (int): number of trials to run for Optuna parameter optimized.
         python (bool, optional): True if running python algorithms from SimpleAi
             False if running CPP algorithms from LocalSearch.
@@ -179,7 +179,7 @@ def problemCreatorFromCPP(problem_seeds, path, num_workers):
     when run_que is filled calls "problemCreatorWorker" function with path, run_que as params.
 
     Args:
-        problem_seeds (list[int]): seed numbers representing the random problem created.
+        problem_seeds (list[str]): seed numbers representing the random problem created.
         path (str): path to the .exe file which is responsible for problem creating using some seed.
         num_workers (int): number of threads used for creating problems simultaneously.
 

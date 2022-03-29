@@ -1,15 +1,47 @@
 from simpleaipack.search import SearchProblem
-from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing
 from fileReader import Reader
 from structClasses import *
 
 import numpy as np
 from copy import deepcopy
-from time import time
+
+"""
+COP class inherits from SimpleAi SearchProblem module.
+Responsible for:
+    i) self problem creation if needed and can read problem from existing created COP problem.
+    ii) executing localsearch algorithms from SimpleAi package implementing needed functions for the algorithms from:
+        SearchProblem.
+        
+functions req for algorithms:
+    1) simulated_annealing: actions, result, value.
+    2) hill_climbing_stochastic: actions, result, value.
+    3) beam_best_first: actions, result, value, generate_random_state.
+"""
 
 
 class COP(SearchProblem):
     def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, algoName, algoSeed, initialSolution=None, loadProblemFromFile=True):
+        """COP problem class. used to initialize COP problem and solve it using various local search algorithms.
+
+        Args:
+            problemSeed (int): COP problem seed number.
+            numOfVarChangesInNeighborhood (int): size of the neighborhood of a solution.
+            path (str): path to the folder which contains all the files needed to initialize a COP problem created.
+            algoName (str): name of an algorithm.
+            algoSeed (str): stochastic behaviour of algorithms.
+            initialSolution (SolutionVector, optional): leave empty if want to start from init SolutionVector
+                else provide SolutionVector.
+            loadProblemFromFile (bool, optional): True if initialize COP problem from created COP problem
+                else False for self creation on COP problem.
+
+        Returns:
+             None.
+
+        Notes:
+            self.availableStatesSize: is set to be 50, purpose is to not search all possible delta states of current
+                SolutionVector state but only generate 50 of them.
+            can be changed to increase performance but run slower.
+        """
         self.availableStatesSize = 50
         self.algoName = algoName
         self.algoSeed = algoSeed
@@ -37,10 +69,26 @@ class COP(SearchProblem):
 
     @staticmethod
     def binConsIdx(x, y):
+        """Calculating the corresponding location for 1d array
+
+        Args:
+            x (int): row index
+            y (int): col index
+
+        Returns:
+             int: location inside 1d array.
+        """
         return x * MAX_TOTAL_VALUES + y
 
     def valuesPerVariablesInit(self):
-        # np.random.seed(self.problemSeed)
+        """COP self initialization problem. python implementation for COP constructor from localsearch.h it cpp.
+
+        Args:
+            None.
+
+        Returns:
+             None.
+        """
         constraintsRatio = np.random.randint(2, MAX_CONSTRAINTS_RATIO)
         varNum = np.random.randint(1, MAX_NUM_OF_VARS)
         self.maxValuesNum = min(MAX_TOTAL_VALUES // varNum, MAX_VALUES_OF_VAR)
@@ -68,6 +116,14 @@ class COP(SearchProblem):
                         self.binaryConstraintsMatrix[self.binConsIdx(x, y)] = np.random.randint(0, constraintsRatio)
 
     def generateSingleNeighbor(self, currentSolution):
+        """Generating new SolutionVector randomized in numOfVarChangesInNeighborhood places from currentSolution.
+
+        Args:
+            currentSolution (SolutionVector): current SolutionVector.
+
+        Returns:
+            SolutionVector: randomized SolutionVector in numOfVarChangesInNeighborhood places.
+        """
         outputSolution = SolutionVector()
         outputSolution.solutionVector = deepcopy(currentSolution.solutionVector)
 
@@ -79,8 +135,14 @@ class COP(SearchProblem):
         return outputSolution
 
     def evaluateSolution(self, solutionVec):
+        """Evaluating the passed SolutionVector as GradesVector.
+
+        Args:
+            solutionVec (SolutionVector): current SolutionVector.
+        Returns:
+            GradesVector: evaluation of passed SolutionVector.
+        """
         outputEvaluation = GradesVector()
-        # outputEvaluation = np.zeros(shape=MAX_LENGTH_OF_GRADES_VECTOR, dtype=np.float32)
         MsUsage = deepcopy(self.Ms)
         for currSolVar in range(self.valuesPerVariables.validVarAmount):
             currIsLegal = True
@@ -116,6 +178,16 @@ class COP(SearchProblem):
         return outputEvaluation
 
     def actions(self, state):
+        """Generates self.availableStatesSize random 2-tuples.
+        what index to change and into what number. because it is random it doesn't matter what is the current state.
+
+        Args:
+            state (SolutionVector): current state.
+
+        Returns:
+            list[list[(int, int)]]: a single action is performing self.numOfVarChangesInNeighborhood in current state.
+                and there are self.availableStatesSize such actions.
+        """
         actions = []
         for action in range(self.availableStatesSize):  # change (rand_idx, rand_val)
             change = []
@@ -128,6 +200,15 @@ class COP(SearchProblem):
         return actions
 
     def result(self, state, action):
+        """Applying action to the current state. meaning applying delta changed which are located in action.
+
+        Args:
+            state (SolutionVector): current SolutionVector.
+            action (list[(int, int)]): what index to perform the change on, the change.
+
+        Returns:
+            SolutionVector: new state after performing an action on it.
+        """
         newState = deepcopy(state)
         for idx, val in action:
             newState.solutionVector[idx] = val
@@ -135,34 +216,24 @@ class COP(SearchProblem):
         return newState
 
     def value(self, state):
+        """Evaluating the current state.
+
+        Args:
+            state (SolutionVector): current state .
+
+        Returns:
+            float: scalarized GradesVector resulted from applying self.evaluateSolution on input state.
+        """
         evaluation = self.evaluateSolution(state)
         return evaluation.scalarize()
 
     def generate_random_state(self):
+        """Generate random starting points from self.initialSolution as SolutionVector's
+
+        Args:
+            None.
+
+        Returns:
+            SolutionVector: random SolutionVector.
+        """
         return self.generateSingleNeighbor(self.initialSolution)
-
-
-# if __name__ == '__main__':
-    # path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Problems\\'
-    # problem_seed = 500
-    # algo_seed = 100
-    # time_begining_init = time()
-    # copProblem = COP(problemSeed=problem_seed,
-    #                  numOfVarChangesInNeighborhood=5,
-    #                  path=path,
-    #                  initialSolution=None,
-    #                  loadProblemFromFile=True)
-    #
-    # print(f"init time: {time() - time_begining_init}")
-    # problem = copProblem
-    # time_begining_init = time()
-    # # result = hill_climbing_stochastic(problem, iterations_limit=200, max_run_time=20, seed=algo_seed)
-    # result = simulated_annealing(problem, iterations_limit=1120, max_run_time=20, seed=algo_seed, initTemp=5, tempStep=4)
-    # # result = beam_best_first(problem, beam_size=100, iterations_limit=2000, max_run_time=20, seed=algo_seed)
-    # print(f"algo run time: {time() - time_begining_init}")
-    # print(result)
-    # print(type(result))
-    # print(result.value)
-    # print(result.state)
-    # print(problem.evaluateSolution(result.state).scalarize())
-    # print('hello')

@@ -1,3 +1,7 @@
+"""
+file containing all constants required for the COP problem.
+"""
+
 MAX_VAR_PRIORITIES = 20  # must link to VALUES_RANGE[] array somehow. what is variable priority? Condition Variables prio?
 MAX_TOTAL_VALUES = 6000  # upper ceiling of the problem (for matrix of constrains)
 MAX_NUM_OF_VARS = 200  # maximum number of Condition Variables

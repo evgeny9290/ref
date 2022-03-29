@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import re
 
 
@@ -164,7 +163,7 @@ def insert_problem_seed(final_list, problem_set, run_time, algo_seed):
             arr[i][j][k] = parameter for a specific algorithm for a specific problem.
         problem_set (list[str]): array of problem seed's.
         run_time (float): run time parameter for every algorithm.
-        algo_seed (int): seed for stochastic behaviour of algorithm.
+        algo_seed (str): seed for stochastic behaviour of algorithm.
 
     Returns:
          list[list[list[str]]: 3d array, same as 2d array from last function but including "split" hence transforming
@@ -233,7 +232,7 @@ def automize_final_run_file(target_location, problem_set, algo_seed, python=Fals
         target_location (str): path to the folder which has all file problems with best parameters
             for each problem seed for each algorithm
         problem_set (list[str]): array of problem seed's.
-        algo_seed (int): seed for stochastic behaviour of algorithm.
+        algo_seed (str): seed for stochastic behaviour of algorithm.
         python (bool):  True if running python algorithms from SimpleAi
                 False if running CPP algorithms from LocalSearch.
         run_time (float): run time parameter for every algorithm.

@@ -1,6 +1,10 @@
 from Constants import *
 import numpy as np
 
+"""
+same class names as struct named defined within COP class in localsearch.h file.
+"""
+
 
 class VarData:
     def __init__(self):

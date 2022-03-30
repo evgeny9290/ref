@@ -1,8 +1,0 @@
-os
-numpy
-pandas
-seaborn
-matplotlic.pyplot
-optuna
-subprocess
-re

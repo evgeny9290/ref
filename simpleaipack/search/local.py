@@ -293,6 +293,17 @@ def genetic(problem, population_size=100, mutation_chance=0.1,
 
 
 def writeResults(path, time_array, best_val_array, problem):
+    """Writing results of algorithms into appropriate files in path.
+
+    Args:
+        path (str): path to where the results will be written into.
+        time_array (list[timedelta]): array of times at specific iteration
+        best_val_array (list[(SolutionVector, float)]): array of tuples, first is SolutionVector, second is its scalarized evaluation.
+        problem (class): the problem that we defined, in out case its COP
+
+    Returns:
+         None.
+    """
     min_time = min(time_array)
     array_of_times = list(map(lambda x: x + abs(min_time), time_array))[::-1]
     best_val_array = sorted(best_val_array, key=lambda x: x[1])
@@ -362,6 +373,6 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results'
     writeResults(path, array_of_times, array_of_best_solutions_values, problem)
 
-    # return best
+    # return best, prev implementation didn't return the best, it returned the last iteration.
     best_res = max(array_of_best_solutions_values, key=lambda x: x[1])
     return best_res[0]

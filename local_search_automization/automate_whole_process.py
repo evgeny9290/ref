@@ -190,7 +190,7 @@ class COPLocalSearchAlgorithmsAveraging:
 if __name__ == '__main__':
     problemCreatorPath = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearchProblemGenerator.exe'
     graphs_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\\'
-    cpp_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\local_search_automization\dataframes\\'
+    cpp_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\cpp_dataframes\\'
     results_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Results\\'
     run_file = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\final_run.txt'
     LS_exe = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearch.exe'
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                                                           graphs_path=graphs_path,
                                                           cpp_dataframes_path=cpp_dataframes_path,
                                                           num_workers=num_workers,
-                                                          backup=False)
+                                                          backup=True)
 
     # COP_automized_run.generate_problems_from_seeds()
     # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
@@ -233,7 +233,7 @@ if __name__ == '__main__':
     python_exe = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\allAlgsInterface.py'
     python_path_best_args = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\best_values_for_algs\\'
     python_best_params_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\\'
-    python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\dataframes\\'
+    python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
 
     python_run_time = 15.0
     python_num_iterations = 24
@@ -257,7 +257,7 @@ if __name__ == '__main__':
                                                           python_dataframes_path=python_dataframes_path,
                                                           python=True,
                                                           num_workers=python_num_workers,
-                                                          backup=False)
+                                                          backup=True)
 
-    COP_automized_run.run_optuna_param_optimization()
-    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
+    # COP_automized_run.run_optuna_param_optimization()
+    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=True)  # if optimal params already exist run this

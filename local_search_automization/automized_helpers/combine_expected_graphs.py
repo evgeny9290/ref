@@ -29,7 +29,8 @@ def insert_row_if_early_finish(cpp_dfs, run_time):
     in order to prettify the combined graph later on.
 
     Args:
-        all_probs_algs (list[DataFrame]): 1d array of dataframes for expected cpp algorithms.
+        cpp_dfs (list[DataFrame]): 1d array of dataframes for expected cpp algorithms.
+        run_time (float): run time of cpp algorithms to make the graph constant after a while.
 
     Returns:
          list[DataFrame]: same as input but with an additional row if "finished early".

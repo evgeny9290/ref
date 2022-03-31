@@ -6,6 +6,7 @@ from automized_helpers.create_expected_optuna_graph import automize_optuna_expec
 from automized_helpers.create_graphs_and_expected_graph import automize_expected_graph
 from automized_helpers.allAlgsBestParams import best_params_for_all_algos
 from automized_helpers.allAlgsBestParams import problemCreatorFromCPP
+from automized_helpers.combine_expected_graphs import automize_combined_expected_graphs
 
 ###################################################################################################
 ###################################################################################################
@@ -186,6 +187,19 @@ class COPLocalSearchAlgorithmsAveraging:
         """
         problemCreatorFromCPP(self.problem_seeds, self.problemGenerator_exe_path, self.num_workers)
 
+    def combined_expected_graphs(self):
+        """Creating combined expected graph for both cpp,python algorithms for the exact same problems.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+        """
+        automize_combined_expected_graphs(self.cpp_dataframes_path + "expected_dataframes\\",
+                                          self.python_dataframes_path + "expected_dataframes\\",
+                                          self.graphs_path)
+
 
 if __name__ == '__main__':
     problemCreatorPath = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearchProblemGenerator.exe'
@@ -196,18 +210,19 @@ if __name__ == '__main__':
     LS_exe = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearch.exe'
     path_best_args = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\best_values_for_algs\\'
     best_params_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\\'
+    python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
 
     run_time = 1.0
     num_iterations = 24  # used for optuna as number of trials, has to be accurate
     algo_seed = '331991908'
     problem_set = ['271', '291', '375', '390', '500', '504', '549', '567', '643', '805', '1101', '1125', '2923', '3562']
-    algorithms = ['GREAT_DELUGE', 'SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
-                  'GREEDY+GREAT_DELUGE', 'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
-                  'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
+    # algorithms = ['GREAT_DELUGE', 'SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
+    #               'GREEDY+GREAT_DELUGE', 'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
+    #               'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
     num_workers = 4
 
     # problem_set = ['271', '291']
-    # algorithms = ['GREAT_DELUGE', 'GREEDY+GREAT_DELUGE']
+    algorithms = ['SLBS', 'SHC', 'SA']
     COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                           results_path=results_path,
                                                           run_file_path=run_file,
@@ -221,19 +236,20 @@ if __name__ == '__main__':
                                                           run_time=run_time,
                                                           graphs_path=graphs_path,
                                                           cpp_dataframes_path=cpp_dataframes_path,
+                                                          python_dataframes_path=python_dataframes_path,
                                                           num_workers=num_workers,
                                                           backup=True)
 
     # COP_automized_run.generate_problems_from_seeds()
-    # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=True)  # if optimal params already exist run this
+    COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
 
     python_results_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results\\'
     python_run_file = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\python_final_run.txt'
     python_exe = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\allAlgsInterface.py'
     python_path_best_args = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\best_values_for_algs\\'
     python_best_params_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\\'
-    python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
+    # python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
 
     python_run_time = 15.0
     python_num_iterations = 24
@@ -254,10 +270,12 @@ if __name__ == '__main__':
                                                           num_iterations=python_num_iterations,
                                                           run_time=python_run_time,
                                                           graphs_path=graphs_path,
+                                                          cpp_dataframes_path=cpp_dataframes_path,
                                                           python_dataframes_path=python_dataframes_path,
                                                           python=True,
                                                           num_workers=python_num_workers,
                                                           backup=True)
 
-    # COP_automized_run.run_optuna_param_optimization()
-    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=True)  # if optimal params already exist run this
+    COP_automized_run.run_optuna_param_optimization()
+    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
+    COP_automized_run.combined_expected_graphs()

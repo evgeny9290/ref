@@ -1,4 +1,5 @@
 import os
+import random
 
 from automized_helpers.allAlgsBestParams import run_algs_with_optimal_params
 from automized_helpers.bestParams_final_run_file import automize_final_run_file
@@ -196,26 +197,42 @@ class COPLocalSearchAlgorithmsAveraging:
         Returns:
             None.
         """
-        automize_combined_expected_graphs(self.cpp_dataframes_path + "expected_dataframes\\",
-                                          self.python_dataframes_path + "expected_dataframes\\",
+        automize_combined_expected_graphs(self.cpp_dataframes_path + "expected_dataframes/",
+                                          self.python_dataframes_path + "expected_dataframes/",
                                           self.graphs_path)
 
 
 if __name__ == '__main__':
-    problemCreatorPath = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearchProblemGenerator.exe'
-    graphs_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\\'
-    cpp_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\cpp_dataframes\\'
-    results_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Results\\'
-    run_file = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\final_run.txt'
-    LS_exe = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearch.exe'
-    path_best_args = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\best_values_for_algs\\'
-    best_params_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\\'
-    python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
+    # problemCreatorPath = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearchProblemGenerator.exe'
+    # graphs_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\graphs\\'
+    # cpp_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\cpp_dataframes\\'
+    # results_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\Results\\'
+    # run_file = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\final_run.txt'
+    # LS_exe = r'C:\Users\evgni\Desktop\Projects\LocalSearch\Debug\LocalSearch.exe'
+    # path_best_args = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\best_values_for_algs\\'
+    # best_params_path = r'C:\Users\evgni\Desktop\Projects\LocalSearch\LocalSearch\BestParamsPerAlgo\\'
+    # python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
+
+    problemCreatorPath = r'../LocalSearchProblemGenerator/Debug/LocalSearchProblemGenerator.exe'
+    graphs_path = r'../copsimpleai/graphs/'
+    cpp_dataframes_path = r'../copsimpleai/cpp_dataframes/'
+    results_path = r'../copsimpleai/LocalSearch/Results/'
+    run_file = r'../copsimpleai/LocalSearch/BestParamsPerAlgo/final_run.txt'
+    LS_exe = r'../LocalSearch/Debug/LocalSearch.exe'
+    path_best_args = r'../copsimpleai/LocalSearch/BestParamsPerAlgo/best_values_for_algs/'
+    best_params_path = r'../copsimpleai/LocalSearch/BestParamsPerAlgo/'
+    python_dataframes_path = r'../copsimpleai/python_dataframes/'
 
     run_time = 1.0
-    num_iterations = 24  # used for optuna as number of trials, has to be accurate
+    num_iterations = 6  # used for optuna as number of trials, has to be accurate
     algo_seed = '331991908'
-    problem_set = ['271', '291', '375', '390', '500', '504', '549', '567', '643', '805', '1101', '1125', '2923', '3562']
+    # problem_set = ['291']
+    problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258']
+    # problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '3272', '3434', '3487', '3690',
+    #        '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']
+    # problems = [str(random.randint(2500, 5000)) for _ in range(20)]
+    # problem_set = problems.copy()
+    # problem_set = ['271', '291', '375', '390', '500', '504', '549', '567', '643', '805', '1101', '1125', '2923', '3562']
     # algorithms = ['GREAT_DELUGE', 'SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
     #               'GREEDY+GREAT_DELUGE', 'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
     #               'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
@@ -241,20 +258,32 @@ if __name__ == '__main__':
                                                           backup=True)
 
     # COP_automized_run.generate_problems_from_seeds()
-    COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
+    # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+    # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
 
-    python_results_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results\\'
-    python_run_file = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\python_final_run.txt'
-    python_exe = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\allAlgsInterface.py'
-    python_path_best_args = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\best_values_for_algs\\'
-    python_best_params_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\\'
-    # python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
+    # python_results_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results\\'
+    # python_run_file = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\python_final_run.txt'
+    # python_exe = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\allAlgsInterface.py'
+    # python_path_best_args = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\best_values_for_algs\\'
+    # python_best_params_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\BestParamsPerAlgo\\'
+    # # python_dataframes_path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\python_dataframes\\'
+
+    python_results_path = r'../copsimpleai/Results/'
+    python_run_file = r'../copsimpleai/BestParamsPerAlgo/python_final_run.txt'
+    python_exe = r'../copsimpleai/allAlgsInterface.py'
+    python_path_best_args = r'../copsimpleai/BestParamsPerAlgo/best_values_for_algs/'
+    python_best_params_path = r'../copsimpleai/BestParamsPerAlgo/'
 
     python_run_time = 15.0
-    python_num_iterations = 24
+    python_num_iterations = 6
     python_algo_seed = '331991908'
-    python_problem_set = ['271', '291', '375', '390', '500', '504', '549', '567', '643', '805', '1101', '1125', '2923', '3562']
+    # python_problem_set = ['291']
+    #
+    python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258']
+
+    # python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '3272', '3434', '3487', '3690',
+    #        '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']
+    # python_problem_set = ['271', '291', '375', '390', '500', '504', '549', '567', '643', '805', '1101', '1125', '2923', '3562']
     python_algs = ['LBS', 'SHC', 'SA']
     python_num_workers = 4
 

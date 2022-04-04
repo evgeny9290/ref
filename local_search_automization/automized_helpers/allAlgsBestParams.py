@@ -1,3 +1,4 @@
+import os
 import subprocess
 import optuna
 from functools import partial
@@ -94,7 +95,7 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         Returns:
              None.
         """
-        with open(path + rf'best_values_for_algs\bestValue_for_{algo}_problem_{prob_seed}.txt', "a") as txt_file:
+        with open(path + rf'best_values_for_algs/bestValue_for_{algo}_problem_{prob_seed}.txt', "a") as txt_file:
                 txt_file.write(str(study.best_value) + '\n')
 
     direction = 'maximize' if python else 'minimize'
@@ -106,7 +107,7 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
             run_optuna_func = partial(run_optuna, algo=algo, problem_seed=problem_seed, algo_seed=algo_seed, python=python, run_time=run_time)
             call_back_func = partial(print_best_callback, path=output_path, algo=algo, prob_seed=problem_seed)
             study = optuna.create_study(study_name='test', direction=direction)
-            study.optimize(run_optuna_func, n_trials=num_iterations, callbacks=[call_back_func], n_jobs=-1)  # -1 means maximum cpu capacity
+            study.optimize(run_optuna_func, n_trials=num_iterations, callbacks=[call_back_func], n_jobs=6)  # -1 means maximum cpu capacity
             best_params_per_algo_temp.append((algo, problem_seed, algo_seed, study.best_trial.params))
         temp_arr.extend(best_params_per_algo_temp)
         with open(output_path + rf'bestParams_problem_{problem_seed}.txt', "w") as txt_file:
@@ -193,3 +194,9 @@ def problemCreatorFromCPP(problem_seeds, path, num_workers):
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         for _ in range(num_workers):
             executor.submit(problemCreatorWorker, path, run_que)
+#
+#
+# if __name__ == '__main__':
+#     print("current working directory: ", os.getcwd())
+#     path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\LocalSearchProblemGenerator\Debug\LocalSearchProblemGenerator.exe'
+#     problemCreatorFromCPP(['2656'], path, 1)

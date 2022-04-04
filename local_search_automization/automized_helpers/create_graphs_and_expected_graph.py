@@ -484,9 +484,9 @@ def expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time, p
     """
     for expected_df in same_dim_benchmark_after_normalize_fixed_time:
         if python:
-            expected_df.to_csv(python_dataframes_path + fr'expected_dataframes\python_expected_df{expected_df.columns[0]}.csv', index=False)
+            expected_df.to_csv(python_dataframes_path + fr'expected_dataframes/python_expected_df{expected_df.columns[0]}.csv', index=False)
         else:
-            expected_df.to_csv(cpp_dataframes_path + fr'expected_dataframes\cpp_expected_df{expected_df.columns[0]}.csv', index=False)
+            expected_df.to_csv(cpp_dataframes_path + fr'expected_dataframes/cpp_expected_df{expected_df.columns[0]}.csv', index=False)
 
 
 def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python, graphs_path):

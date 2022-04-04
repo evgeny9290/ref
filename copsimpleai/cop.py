@@ -42,7 +42,7 @@ class COP(SearchProblem):
                 SolutionVector state but only generate 50 of them.
             can be changed to increase performance but run slower.
         """
-        self.availableStatesSize = 50
+        self.availableStatesSize = 1
         self.algoName = algoName
         self.algoSeed = algoSeed
         self.problemSeed = problemSeed

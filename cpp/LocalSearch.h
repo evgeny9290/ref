@@ -30,6 +30,15 @@
 
 using namespace std;
 
+std::string GetCurrentDirectory()
+{
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+
+	return std::string(buffer).substr(0, pos);
+}
+
 #pragma region Constraint Optimization Problem
 class COP
 {
@@ -119,7 +128,6 @@ class COP
 		
 };
 
-const string COP::m_strCOPDirectory = "C:\\Users\\evgni\\Desktop\\Projects\\LocalSearch\\LocalSearch\\Problems\\";
 //Random Engine for algorithm behaviour
 std::mt19937 AlgorithmRandomEngine;
 
@@ -176,6 +184,7 @@ double COP::GradesVector::Scalarization() const // sum of util's with respect to
 	return dScalarValue;
 }
 
+
 COP::COP()
 {
 	ValuesPerVariables = new ValuesPerVars;
@@ -184,9 +193,6 @@ COP::COP()
 
 COP::COP(unsigned int uiProblemSeed)
 {
-	m_ofValuesPerVariables.open(m_strCOPDirectory + "ValuesPerVariable_" + to_string(uiProblemSeed) + ".csv"); // my addition
-	m_ofBinaryConstraintsMatrix.open(m_strCOPDirectory + "BinaryConstraintsMatrix_" + to_string(uiProblemSeed) + ".txt"); // my addition
-	m_ofMs.open(m_strCOPDirectory + "Ms_" + to_string(uiProblemSeed) + ".txt"); // my addition
 
 	//Same as COP() - Written again since it might be used within older C++ than C++11
 	ValuesPerVariables = new ValuesPerVars;
@@ -220,7 +226,6 @@ COP::COP(unsigned int uiProblemSeed)
 	for (unsigned int m=0; m<COP::MAX_NUM_OF_MS; m++)
 	{
 		Ms[m].ucAmount = UIntDistForMsAmount(ReproducibleRandomEngine);
-		m_ofMs << to_string(Ms[m].ucAmount) << " "; // my addition
 		/*if (uiProblemSeed >= 1000 && uiProblemSeed <=2000) 
 		{
 			if (m%5==0) Ms[m].ucAmount = 1;
@@ -228,12 +233,9 @@ COP::COP(unsigned int uiProblemSeed)
 		}*/
 			
 	}
-	m_ofMs << to_string(uiMaxValuesNum) << " "; // my addition
-	m_ofMs << to_string(uiVarNum); // my addition
 
 	//Fill ValuesPerVariables Data
 	ValuesPerVariables->uiValidVarAmount = uiVarNum;
-	m_ofValuesPerVariables << "index" << "," << "B" << "," << "M" << "," << "P" << "," << "Q" << "," << "ulValuesAmount" << "," << "ucPrio" << endl; // my addition
 	for (unsigned int variable=0; variable<uiVarNum; variable++)
 	{
 		ValuesPerVariables->VarsData[variable].ulValuesAmount = uiMaxValuesNum;
@@ -245,12 +247,6 @@ COP::COP(unsigned int uiProblemSeed)
 				ValuesPerVariables->VarsData[variable].aucValuesM[value] = UIntDistForM(ReproducibleRandomEngine);
 				ValuesPerVariables->VarsData[variable].aucValuesP[value] = UIntDistForP(ReproducibleRandomEngine);
 				ValuesPerVariables->VarsData[variable].aucValuesQ[value] = UIntDistForQ(ReproducibleRandomEngine);
-				m_ofValuesPerVariables << to_string(variable) << "," << to_string(ValuesPerVariables->VarsData[variable].abValuesB[value]) << ","; // my addition
-				m_ofValuesPerVariables << to_string(ValuesPerVariables->VarsData[variable].aucValuesM[value]) << ","; // my addition
-				m_ofValuesPerVariables << to_string(ValuesPerVariables->VarsData[variable].aucValuesP[value]) << ","; // my addition
-				m_ofValuesPerVariables << to_string(ValuesPerVariables->VarsData[variable].aucValuesQ[value]) << ","; // my addition
-				m_ofValuesPerVariables << to_string(ValuesPerVariables->VarsData[variable].ulValuesAmount) << ","; // my addition
-				m_ofValuesPerVariables << to_string(ValuesPerVariables->VarsData[variable].ucPrio) << endl; // my addition
 
 		}
 	}
@@ -266,18 +262,6 @@ COP::COP(unsigned int uiProblemSeed)
 						variable2* uiMaxValuesNum + value2 < COP::MAX_TOTAL_VALUES); // func below maps to "4d" array? out of bounds?
 					int val = UIntDistForConstraint(ReproducibleRandomEngine); // my addition
 					aaucBinaryConstraintsMatrix[BinConsIdx(variable1 * uiMaxValuesNum + value1, variable2 * uiMaxValuesNum + value2)] = val;
-
-					// my addition
-					if (variable1 == ValuesPerVariables->uiValidVarAmount - 1 &&
-						value1 == ValuesPerVariables->VarsData[variable1].ulValuesAmount - 1 &&
-						variable2 == ValuesPerVariables->uiValidVarAmount - 1 &&
-						value2 == ValuesPerVariables->VarsData[variable2].ulValuesAmount - 1) {
-						m_ofBinaryConstraintsMatrix << to_string(val);
-					}
-
-					else {
-						m_ofBinaryConstraintsMatrix << to_string(val) << " ";
-					}
 				}
 			}
 		}
@@ -289,10 +273,6 @@ COP::~COP()
 {
 	delete ValuesPerVariables;
 	delete [] aaucBinaryConstraintsMatrix;
-	m_ofBinaryConstraintsMatrix.close(); // my addition
-	m_ofMs.close(); // my addition
-	m_ofValuesPerVariables.close(); // my addition
-
 }
 
 void COP::operator=(COP& Cop)
@@ -730,7 +710,10 @@ CFixedTimeSearch<SolutionType, ValueType>::~CFixedTimeSearch() // closing all ne
 }
 
 template<typename SolutionType, typename ValueType> 
-const string CFixedTimeSearch<SolutionType, ValueType>::m_strDirectory = "C:\\Users\\evgni\\Desktop\\Projects\\LocalSearch\\LocalSearch\\Results\\";
+const string CFixedTimeSearch<SolutionType, ValueType>::m_strDirectory = GetCurrentDirectory() + "/" + "../../copsimpleai/LocalSearch/Results/";
+//const string CFixedTimeSearch<SolutionType, ValueType>::m_strDirectory = "C:\\Users\\evgni\\Desktop\\projects_mine\\ref\\ref\\Projects\\LocalSearch\\LocalSearch\Results\\";
+//const string CFixedTimeSearch<SolutionType, ValueType>::m_strDirectory = "C:\\Users\\evgni\\Desktop\\projects_mine\\ref\\ref\\Projects\\LocalSearch\\LocalSearch\Results\\";
+
 
 template<typename SolutionType, typename ValueType> 
 const string CFixedTimeSearch<SolutionType, ValueType>::m_sMeasureStrings[6] = {"After ChooseCandidate",
@@ -1012,10 +995,10 @@ bool CSimulatedAnnealingSearch<SolutionType, ValueType>::AcceptanceCritirionReac
 
 	//Negative Delta is an improvement in a minimization problem
 	double dAcceptanceProbability = 0.0;
-	if (Delta<0)
+	if (Delta < 0)
 		dAcceptanceProbability = 1.0;
-	else
-		dAcceptanceProbability = (double)exp(-Delta/m_fTemprature);
+	else 
+		dAcceptanceProbability = (double)exp(-Delta / m_fTemprature);
 
 #ifdef Couts
 	cout << "Temprature: " << m_fTemprature << " AcceptaceP: " <<dAcceptanceProbability << endl;

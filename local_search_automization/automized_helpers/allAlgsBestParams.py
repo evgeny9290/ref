@@ -62,6 +62,7 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         alpha = trial.suggest_float('alpha', 0.3, 0.9)
         rho = trial.suggest_float('rho', 0.5, 1.0)  # elite size
         epsilon = trial.suggest_float('epsilon', 0.2, 1.0)
+        # print("run time inside optuna: ", run_time)
 
         if python:
             x = subprocess.run(['python', path, algorithm, str(problem_seed), str(run_time), str(algorithm_seed)
@@ -104,6 +105,7 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         temp_arr = []
         best_params_per_algo_temp = []
         for algo in algorithms:
+            # print("before calling optuna runtime: ", run_time)
             run_optuna_func = partial(run_optuna, algo=algo, problem_seed=problem_seed, algo_seed=algo_seed, python=python, run_time=run_time)
             call_back_func = partial(print_best_callback, path=output_path, algo=algo, prob_seed=problem_seed)
             study = optuna.create_study(study_name='test', direction=direction)
@@ -194,9 +196,3 @@ def problemCreatorFromCPP(problem_seeds, path, num_workers):
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         for _ in range(num_workers):
             executor.submit(problemCreatorWorker, path, run_que)
-#
-#
-# if __name__ == '__main__':
-#     print("current working directory: ", os.getcwd())
-#     path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\LocalSearchProblemGenerator\Debug\LocalSearchProblemGenerator.exe'
-#     problemCreatorFromCPP(['2656'], path, 1)

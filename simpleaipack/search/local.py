@@ -5,6 +5,7 @@ import math
 import random
 import datetime
 import numpy as np
+import os
 
 
 def _all_expander(fringe, iteration, viewer):
@@ -342,6 +343,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     run = True
     best = None
     stop = datetime.datetime.now() + datetime.timedelta(seconds=max_run_time)
+
     array_of_best_solutions_values = []
     array_of_times = []
     while run and datetime.datetime.now() < stop:
@@ -370,7 +372,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     ############# writing info to files #####################################################
     #########################################################################################
 
-    path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\Results'
+    path = os.path.join(os.getcwd(), '..', 'copsimpleai', 'Results')
     writeResults(path, array_of_times, array_of_best_solutions_values, problem)
 
     # return best, prev implementation didn't return the best, it returned the last iteration.

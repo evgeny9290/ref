@@ -246,9 +246,9 @@ if __name__ == '__main__':
                                                           num_workers=num_workers,
                                                           backup=True)
 
-    COP_automized_run.generate_problems_from_seeds()
-    COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-    COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
+    # COP_automized_run.generate_problems_from_seeds()
+    # OP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+    # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
 
     python_results_path = r'../copsimpleai/Results/'
     python_run_file = r'../copsimpleai/BestParamsPerAlgo/python_final_run.txt'
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     python_path_best_args = r'../copsimpleai/BestParamsPerAlgo/best_values_for_algs/'
     python_best_params_path = r'../copsimpleai/BestParamsPerAlgo/'
 
-    python_run_time = 15.0
+    python_run_time = 20.0
     python_num_iterations = 24
     python_algo_seed = '331991908'
     # python_problem_set = ['271']  # small test
@@ -285,7 +285,7 @@ if __name__ == '__main__':
                                                           python=True,
                                                           num_workers=python_num_workers,
                                                           backup=True)
-
+    #
     COP_automized_run.run_optuna_param_optimization()
     COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=False, ran_optimal_params=False)  # if optimal params already exist run this
     COP_automized_run.combined_expected_graphs()

@@ -62,7 +62,6 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
         alpha = trial.suggest_float('alpha', 0.3, 0.9)
         rho = trial.suggest_float('rho', 0.5, 1.0)  # elite size
         epsilon = trial.suggest_float('epsilon', 0.2, 1.0)
-        # print("run time inside optuna: ", run_time)
 
         if python:
             x = subprocess.run(['python', path, algorithm, str(problem_seed), str(run_time), str(algorithm_seed)

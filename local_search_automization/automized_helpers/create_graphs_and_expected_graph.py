@@ -276,7 +276,11 @@ def insert_row_if_early_finish(all_probs_algs, run_time):
             col1, col2 = df.columns[0], df.columns[1]
             if df.iloc[-1][1] < run_time:
                 new_row = {col1: df.iloc[-1][0], col2: run_time}
-                all_probs_algs[p_idx][idx] = df.append(new_row, ignore_index=True)
+                all_probs_algs[p_idx][idx] = pd.concat([all_probs_algs[p_idx][idx],
+                                                        pd.DataFrame(new_row, index=[0])],
+                                                       ignore_index=True)
+            # FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version
+                # all_probs_algs[p_idx][idx] = df.append(new_row, ignore_index=True)
     return all_probs_algs
 
 

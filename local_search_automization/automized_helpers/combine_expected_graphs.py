@@ -39,7 +39,9 @@ def insert_row_if_early_finish(cpp_dfs, run_time):
         col1, col2 = df.columns[0], df.columns[1]
         if df.iloc[-1][1] < run_time:
             new_row = {col1: df.iloc[-1][0], col2: run_time}
-            cpp_dfs[idx] = df.append(new_row, ignore_index=True)
+            cpp_dfs[idx] = pd.concat([cpp_dfs[idx], pd.DataFrame(new_row, index=[0])], ignore_index=True)
+            # FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version
+            # cpp_dfs[idx] = df.append(new_row, ignore_index=True)
     return cpp_dfs
 
 

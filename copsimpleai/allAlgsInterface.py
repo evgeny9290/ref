@@ -2,7 +2,6 @@ import os
 import sys
 # need to append the simpleaipack into sys.path so python interpreter will detect it.
 sys.path.append(r'C:\Users\evgni\Desktop\projects_mine\ref\ref')
-
 from cop import COP
 from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing
 
@@ -11,7 +10,7 @@ interface for python local search algorithms within SimpleAi package.
 """
 
 if __name__ == '__main__':
-    path = r'..\copsimpleai\CPP_Problems\\'
+    path = r'../copsimpleai/CPP_Problems/'
     alg_name = sys.argv[1]
     problem_seed = sys.argv[2]
     run_time = sys.argv[3]

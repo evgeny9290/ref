@@ -355,6 +355,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         best = fringe[0]
 
         array_of_best_solutions_values.append((best, best.value))
+        # print((stop - datetime.datetime.now()).total_seconds())
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 
@@ -372,7 +373,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     ############# writing info to files #####################################################
     #########################################################################################
 
-    path = os.path.join(os.getcwd(), '..', 'copsimpleai', 'Results')
+    path = os.path.join(os.getcwd(), '..', 'copsimpleai', 'pythonLocalSearch', 'Results')
     writeResults(path, array_of_times, array_of_best_solutions_values, problem)
 
     # return best, prev implementation didn't return the best, it returned the last iteration.

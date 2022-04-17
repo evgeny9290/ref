@@ -10,6 +10,7 @@ interface for python local search algorithms within SimpleAi package.
 """
 
 if __name__ == '__main__':
+    max_iterations = 2000000
     path = r'../copsimpleai/CPP_Problems/'
     alg_name = sys.argv[1]
     problem_seed = sys.argv[2]
@@ -38,7 +39,7 @@ if __name__ == '__main__':
                       algoSeed=algo_seed,
                       initialSolution=None,
                       loadProblemFromFile=True)
-        result = hill_climbing_stochastic(problem, iterations_limit=2000, max_run_time=float(run_time), seed=int(algo_seed))
+        result = hill_climbing_stochastic(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
 
     if sys.argv[1] == "SA":
         neighborhood = 0
@@ -70,7 +71,7 @@ if __name__ == '__main__':
                       algoSeed=algo_seed,
                       initialSolution=None,
                       loadProblemFromFile=True)
-        result = simulated_annealing(problem, iterations_limit=2000, max_run_time=float(run_time),
+        result = simulated_annealing(problem, iterations_limit=max_iterations, max_run_time=float(run_time),
                                      seed=int(algo_seed), initTemp=float(initTemp), tempStep=float(tempStep))
     if sys.argv[1] == "LBS":
         neighborhood = 0
@@ -92,6 +93,6 @@ if __name__ == '__main__':
                       algoSeed=algo_seed,
                       initialSolution=None,
                       loadProblemFromFile=True)
-        result = beam_best_first(problem, iterations_limit=2000, max_run_time=float(run_time), seed=int(algo_seed))
+        result = beam_best_first(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
 
     print(f"Results for ParamILS: SAT, -1, {problem_seed}, {result.value}, {algo_seed}")

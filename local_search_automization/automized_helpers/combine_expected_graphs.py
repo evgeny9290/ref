@@ -17,8 +17,10 @@ def load_dataframes_to_arrays(cpp_path, python_path):
     python_dataframes = []
     cpp_dataframes = []
 
-    for cpp_file, python_file in zip(os.listdir(cpp_path), os.listdir(python_path)):
+    for cpp_file in os.listdir(cpp_path):
         cpp_dataframes.append(pd.read_csv(cpp_path + cpp_file))
+
+    for python_file in os.listdir(python_path):
         python_dataframes.append(pd.read_csv(python_path + python_file))
 
     return cpp_dataframes, python_dataframes
@@ -69,7 +71,7 @@ def combined_expected_graph(cpp_dfs, py_dfs, graphs_path):
             label = '_'.join(name_arr[1:3])
         else:
             label = name_arr[1]
-        plt.plot(df[col2], df[col1], label="CPP-" + label, linestyle='--', linewidth=1.5)
+        plt.plot(df[col2], df[col1], label="CPP-" + label, linestyle='--', linewidth=4)
 
     for df in py_dfs:
         col1, col2 = df.columns[0], df.columns[1]

@@ -89,7 +89,6 @@ def read_all_files(files, target_location):
             generic_name = file
             get_number = generic_name.split('_')[2][:-4]
             num_array.append(get_number)
-
     num_array = sorted(num_array, key=lambda x: int(x))
 
     files = [files[0][:19] + prob + '.txt' for prob in num_array]  # full file names reconstruct

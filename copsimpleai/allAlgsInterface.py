@@ -3,7 +3,7 @@ import sys
 # need to append the simpleaipack into sys.path so python interpreter will detect it.
 sys.path.append(r'C:\Users\evgni\Desktop\projects_mine\ref\ref')
 from cop import COP
-from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing
+from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing, greedy
 
 """
 interface for python local search algorithms within SimpleAi package.
@@ -19,6 +19,20 @@ if __name__ == '__main__':
 
     result = None
     problem = None
+
+    if sys.argv[1] == "GREEDY":
+        print("Greedy Search")
+        print("-----------------")
+
+        problem = COP(problemSeed=int(problem_seed),
+                      numOfVarChangesInNeighborhood=1,
+                      path=path,
+                      algoName=alg_name,
+                      algoSeed=algo_seed,
+                      initialSolution=None,
+                      loadProblemFromFile=True)
+        result = greedy(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
+        initial_solution = result
 
     if sys.argv[1] == "SHC":
         neighborhood = 0
@@ -95,4 +109,8 @@ if __name__ == '__main__':
                       loadProblemFromFile=True)
         result = beam_best_first(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
 
-    print(f"Results for ParamILS: SAT, -1, {problem_seed}, {result.value}, {algo_seed}")
+    if sys.argv[1] != "GREEDY":
+        print(f"Results for ParamILS: SAT, -1, {problem_seed}, {result.value}, {algo_seed}")
+    else:
+        print(f"Results for ParamILS: SAT, -1, {problem_seed}, {problem.value(result)}, {algo_seed}")
+

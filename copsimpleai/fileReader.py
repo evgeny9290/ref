@@ -41,7 +41,7 @@ class Reader:
         for file in files:
             if file == "BinaryConstraintsMatrix_" + str(self.problem_seed) + ".txt":
                 with open(self.path + file) as f:
-                    bin_mat = np.array(f.read().split(), dtype=np.int16)
+                    bin_mat = np.array(f.read().split(), dtype=np.int64)
         return bin_mat
 
     def MS_maxValuesNum_reader(self):
@@ -58,7 +58,7 @@ class Reader:
         for file in files:
             if file == "Ms_" + str(self.problem_seed) + ".txt":
                 with open(self.path + file) as f:
-                    MS_file = np.array(f.read().split(), dtype=np.int16)
+                    MS_file = np.array(f.read().split(), dtype=np.int64)
 
         maxValuesNum = MS_file[-2]
 
@@ -84,16 +84,16 @@ class Reader:
         vpvFile = None
         for file in files:
             if file == "ValuesPerVariable_" + str(self.problem_seed) + ".csv":
-                vpvFile = pd.read_csv(self.path + file, dtype=np.int16)
+                vpvFile = pd.read_csv(self.path + file, dtype=np.int64)
 
         list_of_valid_indexes = list(set(vpvFile['index']))
 
         for idx in list_of_valid_indexes:
             valid_info_for_idx = vpvFile[vpvFile['index'] == idx]
-            self.valuesPerVariable.varsData[idx].valuesB = np.array(valid_info_for_idx['B'], dtype=np.int16)
-            self.valuesPerVariable.varsData[idx].valuesM = np.array(valid_info_for_idx['M'], dtype=np.int16)
-            self.valuesPerVariable.varsData[idx].valuesP = np.array(valid_info_for_idx['P'], dtype=np.int16)
-            self.valuesPerVariable.varsData[idx].valuesQ = np.array(valid_info_for_idx['Q'], dtype=np.int16)
+            self.valuesPerVariable.varsData[idx].valuesB = np.array(valid_info_for_idx['B'], dtype=np.int64)
+            self.valuesPerVariable.varsData[idx].valuesM = np.array(valid_info_for_idx['M'], dtype=np.int64)
+            self.valuesPerVariable.varsData[idx].valuesP = np.array(valid_info_for_idx['P'], dtype=np.int64)
+            self.valuesPerVariable.varsData[idx].valuesQ = np.array(valid_info_for_idx['Q'], dtype=np.int64)
             self.valuesPerVariable.varsData[idx].ucPrio = np.int16(valid_info_for_idx['ucPrio'].iloc[0])
             self.valuesPerVariable.varsData[idx].valuesAmount = np.int16(valid_info_for_idx['ulValuesAmount'].iloc[0])
 

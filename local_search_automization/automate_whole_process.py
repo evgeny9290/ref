@@ -171,8 +171,10 @@ class COPLocalSearchAlgorithmsAveraging:
             os.makedirs(self.graphs_path)
             os.makedirs(self.cpp_dataframes_path + "expected_dataframes")
             os.makedirs(self.python_dataframes_path + "expected_dataframes")
-        except FileExistsError:
-            pass
+            print("directories created successfully")
+        except OSError as e:
+            print("something went wrong with directory creation")
+            print(e)
 
         automize_optuna_expected_graph(self.best_val_for_alg_path, self.num_algos, self.num_problems,
                                        self.num_iterations, self.graphs_path, self.python)
@@ -231,9 +233,9 @@ if __name__ == '__main__':
         best_params_path = rf'../copsimpleai/LocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
         python_dataframes_path = rf'../copsimpleai/python_dataframes/algo_seed_{algo_seed}/'
 
-        alg_run_time = 2.0
+        alg_run_time = 1.0
         optuna_run_time = 1.0
-        num_iterations = 30  # used for optuna as number of trials, has to be accurate
+        num_iterations = 12  # used for optuna as number of trials, has to be accurate
 
         problem_set = ['2701', '2734', '3118']  # medium test
         # problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '271', '3258', '4233', '4273', '4326']  # medium test
@@ -248,8 +250,8 @@ if __name__ == '__main__':
         #               'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
         num_workers = 3
 
-        algorithms = ['RS', 'RW', 'SHC', 'SA']
-        # algorithms = ['GREAT_DELUGE', 'SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE']
+        # algorithms = ['RS', 'RW', 'SHC', 'SA']
+        algorithms = ['SHC', 'SA', 'GREEDY']
 
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                               results_path=results_path,
@@ -270,9 +272,9 @@ if __name__ == '__main__':
                                                               backup=True,
                                                               unique_trials=False)
 
-        COP_automized_run.generate_problems_from_seeds()
-        COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
+        # COP_automized_run.generate_problems_from_seeds()
+        # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+        # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
 
         python_results_path = r'../copsimpleai/pythonLocalSearch/Results/'
         python_run_file = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/python_final_run.txt'
@@ -280,9 +282,9 @@ if __name__ == '__main__':
         python_path_best_args = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/best_values_for_algs/'
         python_best_params_path = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
 
-        python_alg_run_time = 120.0
-        python_optuna_run_time = 10.0
-        python_num_iterations = 30
+        python_alg_run_time = 10.0
+        python_optuna_run_time = 5.0
+        python_num_iterations = 12
         python_algo_seed = algo_seed
         python_problem_set = ['2701', '2734', '3118']  # medium test
 
@@ -290,7 +292,9 @@ if __name__ == '__main__':
 
         # python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '3272', '3434', '3487', '3690',
         #                       '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']  # big test
-        python_algs = ['LBS', 'SHC', 'SA']
+        # python_algs = ['LBS', 'SHC', 'SA']
+        python_algs = ['SHC', 'SA', 'GREEDY']
+
         python_num_workers = 3
 
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
@@ -315,4 +319,4 @@ if __name__ == '__main__':
 
         COP_automized_run.run_optuna_param_optimization()
         COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
-        COP_automized_run.combined_expected_graphs()
+        # COP_automized_run.combined_expected_graphs()

@@ -168,13 +168,14 @@ class COP(SearchProblem):
                     break
                 outputEvaluation.gradesVector[LEVEL_OF_BINARY_CONSTRAINTS] -= currBinaryVal
 
-            if currIsLegal:
+            if currIsLegal:  # was -= for minimization. testing +=
                 MsUsage[currM].amount -= 1
                 outputEvaluation.gradesVector[2 * currPrio] -= 1
                 outputEvaluation.gradesVector[2 * currPrio + 1] -= currP
                 outputEvaluation.gradesVector[LEVEL_OF_B] -= currB
                 outputEvaluation.gradesVector[LEVEL_OF_Q] -= currQ
 
+        print(outputEvaluation)
         return outputEvaluation
 
     def actions(self, state):
@@ -191,12 +192,11 @@ class COP(SearchProblem):
         actions = []
         for action in range(self.availableStatesSize):  # change (rand_idx, rand_val)
             change = []
-            for var in range(self.numOfVarChangesInNeighborhood):
+            for var in range(1, self.numOfVarChangesInNeighborhood + 1):
                 rand_entry = np.random.randint(0, self.valuesPerVariables.validVarAmount)
                 rand_val = np.random.randint(0, self.valuesPerVariables.varsData[rand_entry].valuesAmount)
                 change.append((rand_entry, rand_val))
             actions.append(change)
-
         return actions
 
     def result(self, state, action):
@@ -212,7 +212,6 @@ class COP(SearchProblem):
         newState = deepcopy(state)
         for idx, val in action:
             newState.solutionVector[idx] = val
-
         return newState
 
     def value(self, state):
@@ -227,6 +226,9 @@ class COP(SearchProblem):
         evaluation = self.evaluateSolution(state)
         return evaluation.scalarize()
 
+    def grade_value(self, state):
+        return self.evaluateSolution(state)
+
     def generate_random_state(self):
         """Generate random starting points from self.initialSolution as SolutionVector's
 
@@ -237,3 +239,31 @@ class COP(SearchProblem):
             SolutionVector: random SolutionVector.
         """
         return self.generateSingleNeighbor(self.initialSolution)
+
+
+# if __name__ == '__main__':
+#     problem = COP(problemSeed=3118,
+#                   numOfVarChangesInNeighborhood=5,
+#                   path=r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\CPP_Problems\\',
+#                   algoName='GREEDY',
+#                   algoSeed='331991908',
+#                   initialSolution=None,
+#                   loadProblemFromFile=True)
+#
+#     x = [84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84,
+#          84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84,
+#          84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+#
+#     y = [82, 0, 0, 78, 44, 0, 0, 18, 9, 2, 0, 1, 0, 57, 67, 0, 28, 37, 3, 16, 0, 21, 64, 30, 48, 0, 11, 40, 64, 68, 17,
+#          39, 10, 66, 82, 7, 80, 23, 73, 15, 16, 22, 82, 61, 27, 46, 73, 67, 58, 68, 41, 44, 73, 71, 46, 77, 50, 58, 27,
+#          81, 23, 51, 14, 38, 5, 33, 4, 74, 21, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+#
+#     sv = SolutionVector()
+#     sv.solutionVector = x
+#     print(problem.evaluateSolution(sv))

@@ -86,6 +86,9 @@ class SearchProblem(object):
         """
         return str(action)
 
+    def grade_value(self, state):
+        raise NotImplementedError
+
 
 class SearchNode(object):
     '''Node of a search process.'''

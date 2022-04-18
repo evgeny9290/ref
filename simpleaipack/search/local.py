@@ -6,9 +6,10 @@ import random
 import datetime
 import numpy as np
 import os
+from copsimpleai.structClasses import SolutionVector, GradesVector
 
 
-def _all_expander(fringe, iteration, viewer):
+def _all_expander(fringe, iteration, viewer, problem):
     '''
     Expander that expands all nodes on the fringe.
     '''
@@ -41,7 +42,7 @@ def beam(problem, beam_size=100, iterations_limit=0, viewer=None):
                          viewer=viewer)
 
 
-def _first_expander(fringe, iteration, viewer):
+def _first_expander(fringe, iteration, viewer, problem):
     '''
     Expander that expands only the first node on the fringe.
     '''
@@ -94,7 +95,7 @@ def hill_climbing(problem, iterations_limit=0, viewer=None):
                          viewer=viewer)
 
 
-def _random_best_expander(fringe, iteration, viewer):
+def _random_best_expander(fringe, iteration, viewer, problem):
     '''
     Expander that expands one randomly chosen nodes on the fringe that
     is better than the current (first) node.
@@ -126,6 +127,48 @@ def hill_climbing_stochastic(problem, iterations_limit=0, viewer=None, max_run_t
     random.seed(seed)
     return _local_search(problem,
                          _random_best_expander,
+                         iterations_limit=iterations_limit,
+                         fringe_size=1,
+                         stop_when_no_better=iterations_limit==0,
+                         viewer=viewer,
+                         max_run_time=max_run_time)
+
+
+def _greedy_expander(fringe, iteration, viewer, problem):
+    '''
+    Expander that expands one randomly chosen nodes on the fringe that
+    is better than the current (first) node.
+    '''
+    current_sol_vec = fringe[0]
+    best_sol_vec = SolutionVector()
+    best_grade_vec = GradesVector().scalarize()
+
+    if iteration >= problem.valuesPerVariables.validVarAmount:
+        return 'STOP_GREEDY'
+
+    for curVarValue in range(problem.maxValuesNum):
+        current_sol_vec.solutionVector[iteration] = curVarValue
+        cur_grade_vec = problem.value(current_sol_vec)
+        if cur_grade_vec > best_grade_vec:
+            best_sol_vec.solutionVector = current_sol_vec.solutionVector
+            best_grade_vec = cur_grade_vec
+
+    return best_sol_vec
+
+
+def greedy(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
+    '''
+    greedy.
+
+    If iterations_limit is specified, the algorithm will end after that
+    number of iterations. Else, it will continue until it can't find a
+    better node than the current one.
+    Requires: SearchProblem.actions, SearchProblem.result, and
+    SearchProblem.value.
+    '''
+    random.seed(seed)
+    return _local_search(problem,
+                         _greedy_expander,
                          iterations_limit=iterations_limit,
                          fringe_size=1,
                          stop_when_no_better=iterations_limit==0,
@@ -182,7 +225,7 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     '''
     random.seed(seed)
 
-    def _expander(fringe, iteration, viewer):
+    def _expander(fringe, iteration, viewer, problem):
         T = schedule(iteration, k=initTemp, lam=tempStep)
         current = fringe[0]
         neighbors = current.expand(local_search=True)
@@ -335,8 +378,11 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
             s = problem.generate_random_state()
             fringe.append(SearchNodeValueOrdered(state=s, problem=problem))
     else:
-        fringe.append(SearchNodeValueOrdered(state=problem.initial_state,
-                                             problem=problem))
+        if problem.algoName == 'GREEDY':
+            fringe.append(problem.initial_state)
+        else:
+            fringe.append(SearchNodeValueOrdered(state=problem.initial_state,
+                                                 problem=problem))
 
     finish_reason = ''
     iteration = 0
@@ -351,18 +397,29 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
             viewer.event('new_iteration', list(fringe))
 
         old_best = fringe[0]
-        fringe_expander(fringe, iteration, viewer)
-        best = fringe[0]
+        if problem.algoName == 'GREEDY':
+            best = fringe_expander(fringe, iteration, viewer, problem)
+        else:
+            fringe_expander(fringe, iteration, viewer, problem)
+            best = fringe[0]
 
-        array_of_best_solutions_values.append((best, best.value))
-        # print((stop - datetime.datetime.now()).total_seconds())
+        if best == 'STOP_GREEDY':
+            break
+
+        if problem.algoName == 'GREEDY':
+            array_of_best_solutions_values.append((best, problem.value(best)))
+        else:
+            array_of_best_solutions_values.append((best, best.value))
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 
         if iterations_limit and iteration >= iterations_limit:
             run = False
             finish_reason = 'reaching iteration limit'
-        elif old_best.value >= best.value and stop_when_no_better:
+        elif problem.algoName == 'GREEDY' and old_best >= best and stop_when_no_better:
+            run = False
+            finish_reason = 'greedy stopped, not being able to improve solution'
+        elif problem.algoName != 'GREEDY' and old_best.value >= best.value and stop_when_no_better:
             run = False
             finish_reason = 'not being able to improve solution'
 

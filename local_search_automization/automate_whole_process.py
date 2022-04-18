@@ -219,8 +219,8 @@ class COPLocalSearchAlgorithmsAveraging:
 
 
 if __name__ == '__main__':
-    algo_seeds = ['199190833', '331991908', '222991908']
-    # algo_seeds = ['331991908']
+    # algo_seeds = ['199190833', '331991908', '222991908']
+    algo_seeds = ['331991908']
 
     for algo_seed in algo_seeds:
         problemCreatorPath = r'../LocalSearchProblemGenerator/Debug/LocalSearchProblemGenerator.exe'
@@ -272,7 +272,7 @@ if __name__ == '__main__':
                                                               backup=True,
                                                               unique_trials=False)
 
-        # COP_automized_run.generate_problems_from_seeds()
+        COP_automized_run.generate_problems_from_seeds()
         # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
         # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
 
@@ -283,10 +283,12 @@ if __name__ == '__main__':
         python_best_params_path = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
 
         python_alg_run_time = 10.0
-        python_optuna_run_time = 5.0
-        python_num_iterations = 12
+        python_optuna_run_time = 1.0
+        python_num_iterations = 6
         python_algo_seed = algo_seed
-        python_problem_set = ['2701', '2734', '3118']  # medium test
+        python_problem_set = ['2701']  # medium test
+        # python_problem_set = ['2701', '2734', '3118']  # medium test
+
 
         # python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '4233', '4273', '4326']  # medium test
 
@@ -294,8 +296,10 @@ if __name__ == '__main__':
         #                       '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']  # big test
         # python_algs = ['LBS', 'SHC', 'SA']
         python_algs = ['SHC', 'SA', 'GREEDY']
+        # python_algs = ['GREEDY']
 
-        python_num_workers = 3
+
+        python_num_workers = 1
 
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                               results_path=python_results_path,

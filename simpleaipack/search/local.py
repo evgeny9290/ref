@@ -6,6 +6,7 @@ import random
 import datetime
 import numpy as np
 import os
+from copy import deepcopy
 from copsimpleai.structClasses import SolutionVector, GradesVector
 
 
@@ -134,12 +135,12 @@ def hill_climbing_stochastic(problem, iterations_limit=0, viewer=None, max_run_t
                          max_run_time=max_run_time)
 
 
-def _greedy_expander(fringe, iteration, viewer, problem):
+def _greedy_expander(cur_sol, iteration, viewer, problem):
     '''
     Expander that expands one randomly chosen nodes on the fringe that
     is better than the current (first) node.
     '''
-    current_sol_vec = fringe[0]
+    current_sol_vec = deepcopy(cur_sol)
     best_sol_vec = SolutionVector()
     best_grade_vec = GradesVector().scalarize()
 
@@ -150,7 +151,7 @@ def _greedy_expander(fringe, iteration, viewer, problem):
         current_sol_vec.solutionVector[iteration] = curVarValue
         cur_grade_vec = problem.value(current_sol_vec)
         if cur_grade_vec > best_grade_vec:
-            best_sol_vec.solutionVector = current_sol_vec.solutionVector
+            best_sol_vec.solutionVector = deepcopy(current_sol_vec.solutionVector)
             best_grade_vec = cur_grade_vec
 
     return best_sol_vec
@@ -166,7 +167,9 @@ def greedy(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
     Requires: SearchProblem.actions, SearchProblem.result, and
     SearchProblem.value.
     '''
+    problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
     random.seed(seed)
+
     return _local_search(problem,
                          _greedy_expander,
                          iterations_limit=iterations_limit,
@@ -373,13 +376,14 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         viewer.event('started')
 
     fringe = BoundedPriorityQueue(fringe_size)
+    curr_sol = None
     if random_initial_states:
         for _ in range(fringe_size):
             s = problem.generate_random_state()
             fringe.append(SearchNodeValueOrdered(state=s, problem=problem))
     else:
         if problem.algoName == 'GREEDY':
-            fringe.append(problem.initial_state)
+            curr_sol = problem.initial_state
         else:
             fringe.append(SearchNodeValueOrdered(state=problem.initial_state,
                                                  problem=problem))
@@ -396,9 +400,15 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         if viewer:
             viewer.event('new_iteration', list(fringe))
 
-        old_best = fringe[0]
+        if problem.algoName != 'GREEDY':
+            old_best = fringe[0]
+        else:
+            old_best = curr_sol
+
         if problem.algoName == 'GREEDY':
-            best = fringe_expander(fringe, iteration, viewer, problem)
+            best = fringe_expander(curr_sol, iteration, viewer, problem)
+            curr_sol = best
+
         else:
             fringe_expander(fringe, iteration, viewer, problem)
             best = fringe[0]
@@ -410,6 +420,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
             array_of_best_solutions_values.append((best, problem.value(best)))
         else:
             array_of_best_solutions_values.append((best, best.value))
+
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 

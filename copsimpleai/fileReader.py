@@ -94,8 +94,8 @@ class Reader:
             self.valuesPerVariable.varsData[idx].valuesM = np.array(valid_info_for_idx['M'], dtype=np.int64)
             self.valuesPerVariable.varsData[idx].valuesP = np.array(valid_info_for_idx['P'], dtype=np.int64)
             self.valuesPerVariable.varsData[idx].valuesQ = np.array(valid_info_for_idx['Q'], dtype=np.int64)
-            self.valuesPerVariable.varsData[idx].ucPrio = np.int16(valid_info_for_idx['ucPrio'].iloc[0])
-            self.valuesPerVariable.varsData[idx].valuesAmount = np.int16(valid_info_for_idx['ulValuesAmount'].iloc[0])
+            self.valuesPerVariable.varsData[idx].ucPrio = np.int64(valid_info_for_idx['ucPrio'].iloc[0])
+            self.valuesPerVariable.varsData[idx].valuesAmount = np.int64(valid_info_for_idx['ulValuesAmount'].iloc[0])
 
 
 

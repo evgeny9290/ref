@@ -175,7 +175,6 @@ class COP(SearchProblem):
                 outputEvaluation.gradesVector[LEVEL_OF_B] -= currB
                 outputEvaluation.gradesVector[LEVEL_OF_Q] -= currQ
 
-        print(outputEvaluation)
         return outputEvaluation
 
     def actions(self, state):

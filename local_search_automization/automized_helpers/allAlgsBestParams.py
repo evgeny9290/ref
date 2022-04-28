@@ -25,7 +25,8 @@ optuna_parametrization_funcs = {'SLBS': stochastic_local_beam_search_optuna,
                                 'GREEDYLOOP': random_search_or_greedy_optuna,
                                 'GREEDY+TS': tabu_search_optuna,
                                 'GREEDY+SA': simulated_annehiling_optuna,
-                                'GREEDY+CE': cross_entropy_optuna}
+                                'GREEDY+CE': cross_entropy_optuna,
+                                'GREEDY+LBS': stochastic_local_beam_search_optuna}
 
 
 class RepeatPruner(optuna.pruners.BasePruner):

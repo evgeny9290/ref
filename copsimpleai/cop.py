@@ -16,6 +16,10 @@ functions req for algorithms:
     1) simulated_annealing: actions, result, value.
     2) hill_climbing_stochastic: actions, result, value.
     3) beam_best_first: actions, result, value, generate_random_state.
+    4) greedy: value.
+    5) random walk: actions, result, value.
+    6) random search: None.
+
 """
 
 

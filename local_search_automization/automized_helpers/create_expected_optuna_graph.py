@@ -97,7 +97,7 @@ def create_expected_df_all_algs_arr(all_problems_optuna_one_alg, num_iterations)
     return expected_df_all_algs
 
 
-def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_path):
+def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_path, algo_seed):
     """Creates expected Optuna monotonic increasing graph in "graphs_path" location.
 
     expected_df_all_algs (list[DataFrame]): array of expected DataFrames from all the algorithms for all problems.
@@ -125,7 +125,10 @@ def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_p
             plt.plot(df[col2], df[col1], label=label, linestyle='--', linewidth=1.5)
         plt.xlabel('iterations', fontsize=18)
         plt.ylabel('best_quality', fontsize=18, rotation='horizontal', loc='center')
-        plt.title('Expected Graph Optuna', fontsize=18)
+        if python:
+            plt.title(f'Python Expected Graph Optuna\n algo seed: {algo_seed}', fontsize=18)
+        else:
+            plt.title(f'CPP Expected Graph Optuna\n algo seed: {algo_seed}', fontsize=18)
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
     if python:
         plt.savefig(graphs_path + fr'Python_Expected_Graph_Optuna_all_algs.png')
@@ -134,7 +137,7 @@ def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_p
     plt.clf()
 
 
-def automize_optuna_expected_graph(path, num_algs, num_problems, num_iterations, graphs_path, python=False):
+def automize_optuna_expected_graph(path, num_algs, num_problems, num_iterations, graphs_path, python=False, algo_seed=0):
     """Automizing whole process of creating the Expected Optuna Graph.
     Calling all helper functions in corrent order.
 
@@ -154,4 +157,4 @@ def automize_optuna_expected_graph(path, num_algs, num_problems, num_iterations,
     all_algs_optuna_dfs = convert_to_dfs(best_val_all_algos, path)
     all_problems_optuna_one_alg = all_probs_one_alg(all_algs_optuna_dfs, num_algs, num_problems)
     expected_df_all_algs = create_expected_df_all_algs_arr(all_problems_optuna_one_alg, num_iterations)
-    expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_path)
+    expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_path, algo_seed)

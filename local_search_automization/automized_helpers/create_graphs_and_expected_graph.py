@@ -78,16 +78,26 @@ def merge_files_into_initial(best_vals_files, initial_best_val_files, time_files
         name1 = file_read
         name2 = file_write
         with open(path + name1, "r") as file:
-            data2 = file.read()
+            data = file.read()
         with open(path + name2, "a") as fout:
-            fout.write(data2)
+            fout.write(data)
 
     for file_read, file_write in zip(time_files, initial_time_files):
         name1 = file_read
         name2 = file_write
         with open(path + name1, "r") as file:
             data2 = file.read()
-        with open(path + name2, "a") as fout:
+
+        with open(path + name2, "a+") as fout:
+            fout.seek(0)
+            cur_data = fout.read()
+            try:
+                max_time = float(cur_data.split('\n')[-1])
+            except ValueError:
+                max_time = float(cur_data.split('\n')[-2])
+            except Exception as e:
+                print(e)
+            data2 = "\n".join(list(map(lambda x: str(float(x) + max_time), data2.split('\n')[:-1])))
             fout.write(data2)
 
     for file in best_vals_files:
@@ -284,7 +294,7 @@ def insert_row_if_early_finish(all_probs_algs, run_time):
     return all_probs_algs
 
 
-def graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path):
+def graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path, algo_seed):
     """Creates a graph for every problem in "problem_seeds" with all algorithms
      using the DataFrames from "all_probs_algs"
 
@@ -314,7 +324,10 @@ def graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path):
                 plt.plot(df[col2], df[col1], label=label, linestyle='--', linewidth=1.5)
             plt.xlabel('time in seconds', fontsize=18)
             plt.ylabel('quality', fontsize=18, rotation='horizontal')
-            plt.title(f'problem seed: {problem_seed}', fontsize=18)
+            if python:
+                plt.title(f'Python problem seed: {problem_seed}\n algo seed: {algo_seed}', fontsize=18)
+            else:
+                plt.title(f'CPP problem seed: {problem_seed}\n algo seed: {algo_seed}', fontsize=18)
         plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
         if python:
             plt.savefig(graphs_path + fr'python_problem_num_{problem_seed}.png')
@@ -383,7 +396,7 @@ def algo_for_prob_matrix(all_probs_algs, num_problems, num_algos):
 
 
 def fix_dim_all_probs_all_algs_inplace(same_algs_all_probs, max_len_df_per_algo, python,
-                                       cpp_dataframes_path, python_dataframes_path, backup):
+                                       cpp_dataframes_path, python_dataframes_path, backup, run_time):
     """Reshaping the DataFrames to be of the same shape in order to find the expected DataFrame.
     Also creating backup DataFrames in appropriate path if backup wanted.
 
@@ -403,7 +416,8 @@ def fix_dim_all_probs_all_algs_inplace(same_algs_all_probs, max_len_df_per_algo,
         for idx_df, df in enumerate(alg):
             len_to_add = max_len_for_algo - len(df)
             new_series_col1 = [df.iloc[-1][0]] * len_to_add
-            new_series_col2 = [1] * len_to_add
+            # new_series_col2 = [1] * len_to_add  # run_time
+            new_series_col2 = [run_time] * len_to_add
             new_df = pd.DataFrame({df.columns[0]: new_series_col1, df.columns[1]: new_series_col2})
             same_algs_all_probs[idx_alg][idx_df] = pd.concat([df, new_df], ignore_index=True)
             if backup:
@@ -436,7 +450,7 @@ def create_expected_dfs_all_algs(same_dim_benchmark):
 
     return expected_df_all_algs
 
-
+# this function is not usefull at this moment. for now i leave it blank for future reference.
 def time_smoothing_for_expected_dfs(extra_backup_after_normalize, max_len_df_per_algo, run_time):
     """Smoothing the time column of each expected DataFrame so there wont be sudden jumps and
     to make the graph monotonically increasing.
@@ -449,12 +463,12 @@ def time_smoothing_for_expected_dfs(extra_backup_after_normalize, max_len_df_per
     Return:
         None.
     """
-    for algo, max_len in zip(extra_backup_after_normalize, max_len_df_per_algo):
-        col_time = algo.columns[1]
-        try:
-            algo[col_time] = np.arange(0, run_time, run_time / max_len)
-        except:
-            algo[col_time] = np.arange(0, run_time, run_time / max_len)[:-1]
+    # for algo, max_len in zip(extra_backup_after_normalize, max_len_df_per_algo):
+    #     col_time = algo.columns[1]
+    #     try:
+    #         algo[col_time] = np.arange(0, run_time, run_time / max_len)
+    #     except:
+    #         algo[col_time] = np.arange(0, run_time, run_time / max_len)[:-1]
 
 
 def rename_df_cols_inplace(same_dim_benchmark_after_normalize_fixed_time):
@@ -493,7 +507,7 @@ def expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time, p
             expected_df.to_csv(cpp_dataframes_path + fr'expected_dataframes/cpp_expected_df{expected_df.columns[0]}.csv', index=False)
 
 
-def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python, graphs_path):
+def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python, graphs_path, algo_seed):
     """Create expected graph for all algorithms all problems.
 
     Args:
@@ -521,7 +535,11 @@ def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, pytho
             plt.plot(df[col2], df[col1], label=label, linestyle='--', linewidth=1.5)
         plt.xlabel('time in seconds', fontsize=18)
         plt.ylabel('quality', fontsize=18, rotation='horizontal')
-        plt.title('Expected Graph', fontsize=18)
+        if python:
+            plt.title(f'Python Expected Graph\n algo seed: {algo_seed}', fontsize=18)
+        else:
+            plt.title(f'CPP Expected Graph\n algo seed: {algo_seed}', fontsize=18)
+
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
     if python:
         plt.savefig(graphs_path + fr'Python_Expected_Graph.png')
@@ -548,7 +566,7 @@ def sanity_check_file_names(best_val_files, time_files):
             print(val_file, time_file)
 
 
-def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python, graphs_path, run_time):
+def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python, graphs_path, run_time, algo_seed):
     """Automating whole process until graph creation for all problems.
     calling helper functions in correct order.
 
@@ -584,14 +602,14 @@ def automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print
     all_probs_algs = insert_row_if_early_finish(all_probs_algs, run_time)
 
     if print_all_graphs:
-        graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path)
+        graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path, algo_seed)
 
     return all_probs_algs
 
 
 def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_all_graphs,
                             graphs_path, python=False, run_time=1.0,
-                            cpp_dataframes_path=".", python_dataframes_path=".", backup=False):
+                            cpp_dataframes_path=".", python_dataframes_path=".", backup=False, algo_seed=0):
     """Automating whole process until expected graph creation.
     calling helper functions in correct order.
 
@@ -612,11 +630,11 @@ def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_
     Returns:
         None.
     """
-    all_probs_algs = automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python, graphs_path, run_time)
+    all_probs_algs = automize_graphs_per_algo(path, num_algos, num_problems, problem_seeds, print_all_graphs, python, graphs_path, run_time, algo_seed)
     len_dfs = prob_algo_len_matrix(all_probs_algs, num_problems, num_algos)
     max_len_df_per_algo = max_len_df_foreach_algo(len_dfs, num_problems, num_algos)
     same_algs_all_probs = algo_for_prob_matrix(all_probs_algs, num_problems, num_algos)
-    fix_dim_all_probs_all_algs_inplace(same_algs_all_probs, max_len_df_per_algo, python, cpp_dataframes_path, python_dataframes_path, backup)
+    fix_dim_all_probs_all_algs_inplace(same_algs_all_probs, max_len_df_per_algo, python, cpp_dataframes_path, python_dataframes_path, backup, run_time)
     same_dim_benchmark = deepcopy(same_algs_all_probs)
     expected_df_all_algs = create_expected_dfs_all_algs(same_dim_benchmark)
     # same_dim_benchmark_after_normalize = deepcopy(expected_df_all_algs)  # not really needed, was here as a benchmark for debugging.
@@ -625,5 +643,5 @@ def automize_expected_graph(path, num_algos, num_problems, problem_seeds, print_
     rename_df_cols_inplace(same_dim_benchmark_after_normalize_fixed_time)
     expected_dfs_to_csv_inpalce(same_dim_benchmark_after_normalize_fixed_time, python, cpp_dataframes_path, python_dataframes_path)
 
-    expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python, graphs_path)
+    expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, python, graphs_path, algo_seed)
 

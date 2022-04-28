@@ -47,7 +47,7 @@ def insert_row_if_early_finish(cpp_dfs, run_time):
     return cpp_dfs
 
 
-def combined_expected_graph(cpp_dfs, py_dfs, graphs_path):
+def combined_expected_graph(cpp_dfs, py_dfs, graphs_path, algo_seed):
     """Creating combined expected graph for cpp expected dataframes and python dataframes representing the algorithms output.
 
     Args:
@@ -84,14 +84,14 @@ def combined_expected_graph(cpp_dfs, py_dfs, graphs_path):
 
     plt.xlabel('time in seconds', fontsize=18)
     plt.ylabel('quality', fontsize=18, rotation='horizontal')
-    plt.title('Combined Expected Graph', fontsize=18)
-    plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
+    plt.title(f'Combined Expected Graph \n algo seed: {algo_seed}', fontsize=18)
+    plt.legend(loc='center left', bbox_to_anchor=(0.90, 0.5))
     plt.axvline(x=cpp_dfs[0].iloc[-2][1])  # represents the time where cpp algorithms stopped. only for CPP!
     plt.savefig(graphs_path + fr'Combined_Expected_Graph.png')
     plt.clf()
 
 
-def automize_combined_expected_graphs(cpp_dataframes_path, python_dataframes_path, graphs_path):
+def automize_combined_expected_graphs(cpp_dataframes_path, python_dataframes_path, graphs_path, algo_seed):
     """Automating the combined expected graph process. at the end will result in .png file with
     combined graph for both cpp and python algorithms at the graphs_path location.
 
@@ -105,5 +105,5 @@ def automize_combined_expected_graphs(cpp_dataframes_path, python_dataframes_pat
     """
     cpp_dfs, python_dfs = load_dataframes_to_arrays(cpp_dataframes_path, python_dataframes_path)
     new_cpp_dfs = insert_row_if_early_finish(cpp_dfs, python_dfs[0].iloc[-1][1])
-    combined_expected_graph(new_cpp_dfs, python_dfs, graphs_path)
+    combined_expected_graph(new_cpp_dfs, python_dfs, graphs_path, algo_seed)
 

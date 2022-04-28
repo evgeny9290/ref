@@ -22,7 +22,13 @@
 #         self.C.__init__(self)
 #
 #
+# def x():
+#     return 1,2
 # if __name__ == '__main__':
+#     print(type(x()))
+#     if type(x()) is tuple:
+#         print("asasassasasaas")
+
     # x = ["asdasda_11", "asdasdaaaaaa_22"]
     # res = []
     # for _ in x:

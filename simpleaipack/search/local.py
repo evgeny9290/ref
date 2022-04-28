@@ -6,8 +6,9 @@ import random
 import datetime
 import numpy as np
 import os
-from copy import deepcopy
+from copy import deepcopy, copy
 from copsimpleai.structClasses import SolutionVector, GradesVector
+from copsimpleai.Constants import MAX_NUM_OF_VARS
 
 
 def _all_expander(fringe, iteration, viewer, problem):
@@ -54,6 +55,39 @@ def _first_expander(fringe, iteration, viewer, problem):
         viewer.event('expanded', [current], [neighbors])
 
     fringe.extend(neighbors)
+
+
+def _random_walk_expander(curr_sol, iteration, viewer, problem):
+    '''
+    Expander that expands only the first node on the fringe.
+    '''
+    current = curr_sol
+    neighbors = current.expand(local_search=True)
+
+    if viewer:
+        viewer.event('expanded', [current], [neighbors])
+
+    return neighbors
+
+
+def random_walk(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
+    '''
+    Random Walk.
+
+    If iterations_limit is specified, the algorithm will end after that
+    number of iterations. Else, it will continue until it can't find a
+    better node than the current one.
+    Requires: SearchProblem.actions, SearchProblem.result, and
+    SearchProblem.value.
+    '''
+    random.seed(seed)
+    return _local_search(problem,
+                         _random_walk_expander,
+                         iterations_limit=iterations_limit,
+                         fringe_size=1,
+                         stop_when_no_better=iterations_limit==0,
+                         viewer=viewer,
+                         max_run_time=max_run_time)
 
 
 def beam_best_first(problem, beam_size=100, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
@@ -135,24 +169,38 @@ def hill_climbing_stochastic(problem, iterations_limit=0, viewer=None, max_run_t
                          max_run_time=max_run_time)
 
 
-def _greedy_expander(cur_sol, iteration, viewer, problem):
+def _greedy_expander(cur_sol, iteration, cur_iter, problem):
     '''
-    Expander that expands one randomly chosen nodes on the fringe that
-    is better than the current (first) node.
+    Expander that expands the best greedy choice for cur_iter.
+
+    Notes:
+        using cur_iter here instead of iteration because if its GREEDYLOOP the cur_iter needs to reset.
+        also used for GREEDYLOOP via use of a flag.
     '''
     current_sol_vec = deepcopy(cur_sol)
     best_sol_vec = SolutionVector()
     best_grade_vec = GradesVector().scalarize()
+    flag = False
 
-    if iteration >= problem.valuesPerVariables.validVarAmount:
-        return 'STOP_GREEDY'
+    if cur_iter >= problem.valuesPerVariables.validVarAmount:
+        if problem.algoName == "GREEDYLOOP":
+            current_sol_vec = SolutionVector()
+            problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
+            cur_iter = 0
+            flag = True
+        else:
+            return 'STOP_GREEDY'
 
     for curVarValue in range(problem.maxValuesNum):
-        current_sol_vec.solutionVector[iteration] = curVarValue
+        current_sol_vec.solutionVector[cur_iter] = curVarValue
         cur_grade_vec = problem.value(current_sol_vec)
         if cur_grade_vec > best_grade_vec:
             best_sol_vec.solutionVector = deepcopy(current_sol_vec.solutionVector)
             best_grade_vec = cur_grade_vec
+
+    if flag:
+        flag = False
+        return best_sol_vec, -1
 
     return best_sol_vec
 
@@ -172,6 +220,40 @@ def greedy(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
 
     return _local_search(problem,
                          _greedy_expander,
+                         iterations_limit=iterations_limit,
+                         fringe_size=1,
+                         stop_when_no_better=iterations_limit==0,
+                         viewer=viewer,
+                         max_run_time=max_run_time)
+
+
+def _random_search_expander(cur_sol, iteration, viewer, problem):
+    '''
+    Expander that returns a random expansion not based on anything prior.
+    '''
+    current_sol_vec = deepcopy(cur_sol)
+
+    for curVarValue in range(MAX_NUM_OF_VARS):
+        rand_chosen = random.randint(0, problem.valuesPerVariables.varsData[curVarValue].valuesAmount - 1)
+        current_sol_vec.solutionVector[curVarValue] = rand_chosen
+
+    return current_sol_vec
+
+
+def random_search(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
+    '''
+    random search.
+
+    If iterations_limit is specified, the algorithm will end after that
+    number of iterations. Else, it will continue until it can't find a
+    better node than the current one.
+    Requires: SearchProblem.actions, SearchProblem.result, and
+    SearchProblem.value.
+    '''
+    random.seed(seed)
+
+    return _local_search(problem,
+                         _random_search_expander,
                          iterations_limit=iterations_limit,
                          fringe_size=1,
                          stop_when_no_better=iterations_limit==0,
@@ -226,7 +308,7 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     Creates an expander that has a random chance to choose a node that is worse
     than the current (first) node, but that chance decreases with time.
     '''
-    random.seed(seed)
+    # random.seed(seed)
 
     def _expander(fringe, iteration, viewer, problem):
         T = schedule(iteration, k=initTemp, lam=tempStep)
@@ -266,6 +348,7 @@ def simulated_annealing(problem, schedule=_exp_schedule,
     Requires: SearchProblem.actions, SearchProblem.result, and
     SearchProblem.value.
     '''
+    random.seed(seed)
     return _local_search(problem,
                          _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep),
                          iterations_limit=iterations_limit,
@@ -352,7 +435,11 @@ def writeResults(path, time_array, best_val_array, problem):
          None.
     """
     min_time = min(time_array)
-    array_of_times = list(map(lambda x: x + abs(min_time), time_array))[::-1]
+    if min_time < 0:
+        array_of_times = list(map(lambda x: x + abs(min_time), time_array))[::-1]
+    else:
+        array_of_times = list(map(lambda x: x - abs(min_time), time_array))[::-1]
+
     best_val_array = sorted(best_val_array, key=lambda x: x[1])
 
     with open(path + "\Times_" + str(problem.algoName) + "_Problem_" + str(problem.problemSeed) + "_RunSeed_" + str(
@@ -377,21 +464,29 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
 
     fringe = BoundedPriorityQueue(fringe_size)
     curr_sol = None
+    best = None
     if random_initial_states:
         for _ in range(fringe_size):
             s = problem.generate_random_state()
             fringe.append(SearchNodeValueOrdered(state=s, problem=problem))
     else:
-        if problem.algoName == 'GREEDY':
+        if 'InitialGreedy' in problem.algoName or problem.algoName in ['GREEDY', 'GREEDYLOOP', 'RS', 'GREEDY+RS']:
             curr_sol = problem.initial_state
+            best = curr_sol
+        elif problem.algoName in ['RW', 'GREEDY+RW']:
+            curr_sol = SearchNodeValueOrdered(state=problem.initial_state,
+                                                 problem=problem)
+            best = curr_sol
         else:
             fringe.append(SearchNodeValueOrdered(state=problem.initial_state,
                                                  problem=problem))
+            best = fringe[0]
 
     finish_reason = ''
     iteration = 0
+    cur_iter = 0
     run = True
-    best = None
+    curr = None
     stop = datetime.datetime.now() + datetime.timedelta(seconds=max_run_time)
 
     array_of_best_solutions_values = []
@@ -400,23 +495,38 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         if viewer:
             viewer.event('new_iteration', list(fringe))
 
-        if problem.algoName != 'GREEDY':
-            old_best = fringe[0]
-        else:
+        if 'InitialGreedy' in problem.algoName or problem.algoName in ['GREEDY', 'GREEDYLOOP', 'RS', 'GREEDY+RS']:
             old_best = curr_sol
+            curr = fringe_expander(curr_sol, iteration, cur_iter, problem)
 
-        if problem.algoName == 'GREEDY':
-            best = fringe_expander(curr_sol, iteration, viewer, problem)
-            curr_sol = best
+            if type(curr) is tuple:  # to handle greedyloop
+                curr, cur_iter = curr
 
+            if curr != 'STOP_GREEDY' and problem.value(best) < problem.value(curr):
+                best = curr
+
+            cur_iter += 1
+
+
+            curr_sol = curr
         else:
-            fringe_expander(fringe, iteration, viewer, problem)
-            best = fringe[0]
+            if problem.algoName in ['RW', 'GREEDY+RW']:
+                old_best = curr_sol
+                curr = fringe_expander(curr_sol, iteration, viewer, problem)[0]
 
-        if best == 'STOP_GREEDY':
+                if curr != 'STOP_GREEDY' and best.value < curr.value:
+                    best = curr
+
+                curr_sol = curr
+            else:
+                old_best = fringe[0]
+                fringe_expander(fringe, iteration, viewer, problem)
+                best = fringe[0]
+
+        if curr == 'STOP_GREEDY':
             break
 
-        if problem.algoName == 'GREEDY':
+        if 'InitialGreedy' in problem.algoName or problem.algoName in ['GREEDY', 'GREEDYLOOP', 'RS', 'GREEDY+RS']:
             array_of_best_solutions_values.append((best, problem.value(best)))
         else:
             array_of_best_solutions_values.append((best, best.value))
@@ -427,10 +537,10 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         if iterations_limit and iteration >= iterations_limit:
             run = False
             finish_reason = 'reaching iteration limit'
-        elif problem.algoName == 'GREEDY' and old_best >= best and stop_when_no_better:
+        elif ('InitialGreedy' in problem.algoName or problem.algoName in ['GREEDY', 'GREEDYLOOP', 'RS', 'GREEDY+RS']) and old_best >= best and stop_when_no_better:
             run = False
             finish_reason = 'greedy stopped, not being able to improve solution'
-        elif problem.algoName != 'GREEDY' and old_best.value >= best.value and stop_when_no_better:
+        elif 'InitialGreedy' not in problem.algoName and problem.algoName not in ['GREEDY', 'GREEDYLOOP', 'RS', 'GREEDY+RS'] and old_best.value >= best.value and stop_when_no_better:
             run = False
             finish_reason = 'not being able to improve solution'
 
@@ -444,6 +554,14 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
     path = os.path.join(os.getcwd(), '..', 'copsimpleai', 'pythonLocalSearch', 'Results')
     writeResults(path, array_of_times, array_of_best_solutions_values, problem)
 
-    # return best, prev implementation didn't return the best, it returned the last iteration.
+
+    # return best, original implementation didn't return the best, it returned the last iteration.
+    # flag = False
+    # if problem.algoName in ['RS', 'GREEDY+RS', 'RW', 'GREEDY+RW']:
+    #     if 'InitialGreedy' in problem.algoName:
+    #         flag = True
+    #     if not flag:
+    #         return best
+
     best_res = max(array_of_best_solutions_values, key=lambda x: x[1])
     return best_res[0]

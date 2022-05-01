@@ -150,7 +150,7 @@ def random_search_or_greedy_optuna(trial, path, algo, problem_seed, algo_seed, p
     else:
         x = subprocess.run([path, algorithm, str(problem_seed), str(run_time), str(algorithm_seed)]
                                , capture_output=True, text=True)
-
+    print(str(x).split(','))
     return float(str(x).split(',')[-3])  # magic to get the scalarization result
 
 
@@ -218,7 +218,6 @@ def stochastic_hill_climb_optuna(trial, path, algo, problem_seed, algo_seed, pyt
         x = subprocess.run([path, algorithm, str(problem_seed), str(run_time), str(algorithm_seed)
                                , '-neighborhood', str(neighborhood)]
                                , capture_output=True, text=True)
-
     return float(str(x).split(',')[-3])  # magic to get the scalarization result
 
 

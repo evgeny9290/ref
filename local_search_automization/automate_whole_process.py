@@ -219,7 +219,9 @@ class COPLocalSearchAlgorithmsAveraging:
 
 
 if __name__ == '__main__':
-    algo_seeds = ['199190833', '331991908', '222991908']
+    # algo_seeds = ['199190833', '331991908', '222991908']
+    algo_seeds = ['199190833']
+
     for algo_seed in algo_seeds:
         problemCreatorPath = r'../LocalSearchProblemGenerator/Debug/LocalSearchProblemGenerator.exe'
         graphs_path = rf'../copsimpleai/graphs/algo_seed_{algo_seed}/'
@@ -231,11 +233,13 @@ if __name__ == '__main__':
         best_params_path = rf'../copsimpleai/LocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
         python_dataframes_path = rf'../copsimpleai/python_dataframes/algo_seed_{algo_seed}/'
 
-        alg_run_time = 30.0
+        alg_run_time = 100.0
         optuna_run_time = 5.0
         num_iterations = 24  # used for optuna as number of trials, has to be accurate
 
         problem_set = ['3118', '641233', '632142']  # small test
+        # problem_set = ['641233', '632142']  # small test
+
         # problem_set = ['231231']
 
         # problem_set = ['2701', '2734', '3118', '3487', '3690', '4620', '4952']  # medium test
@@ -248,11 +252,11 @@ if __name__ == '__main__':
         # algorithms = ['SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
         #               'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
         #               'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
-        num_workers = 3
+        num_workers = 5
 
         algorithms = ['RS', 'RW', 'SHC', 'SA', 'GREEDY', 'GREEDYLOOP',
                       'GREEDY+SA', 'GREEDY+SHC', 'GREEDY+RW', 'GREEDY+RS']
-        # algorithms = ['GREEDY+SHC', 'GREEDY', 'GREEDYLOOP']
+        # algorithms = ['GREEDY+SHC', 'GREEDY', 'SHC', 'SA']
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                               results_path=results_path,
                                                               run_file_path=run_file,
@@ -273,8 +277,8 @@ if __name__ == '__main__':
                                                               unique_trials=False)
 
         COP_automized_run.generate_problems_from_seeds()
-        COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
+        # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+        # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
 
         python_results_path = r'../copsimpleai/pythonLocalSearch/Results/'
         python_run_file = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/python_final_run.txt'
@@ -282,15 +286,13 @@ if __name__ == '__main__':
         python_path_best_args = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/best_values_for_algs/'
         python_best_params_path = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
 
-        python_alg_run_time = 30.0
-        python_optuna_run_time = 30.0
+        python_alg_run_time = 180.0
+        python_optuna_run_time = 100.0
         python_num_iterations = 24
         python_algo_seed = algo_seed
 
         python_problem_set = ['3118', '641233', '632142']  # small test
-
-
-        # python_problem_set = ['2701', '2734', '3118', '3487', '3690', '4620', '4952']  # medium test
+        # python_problem_set = ['641233', '632142']  # medium test
 
 
         # python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '4233', '4273', '4326']  # medium test
@@ -298,12 +300,12 @@ if __name__ == '__main__':
         # python_problem_set = ['2656', '2701', '2734', '2869', '3118', '3223', '3258', '3272', '3434', '3487', '3690',
         #                       '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']  # big test
         # python_algs = ['LBS', 'SHC', 'SA']
-        # python_algs = ['GREEDY+SHC', 'GREEDY', 'GREEDYLOOP']
+        # python_algs = ['GREEDY+SHC', 'GREEDY', 'SHC', 'SA']
         python_algs = ['RS', 'RW', 'SHC', 'SA', 'GREEDY', 'GREEDYLOOP',
                       'GREEDY+SA', 'GREEDY+SHC', 'GREEDY+RW', 'GREEDY+RS']
 
 
-        python_num_workers = 3
+        python_num_workers = 5
 
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                               results_path=python_results_path,
@@ -325,6 +327,6 @@ if __name__ == '__main__':
                                                               backup=True,
                                                               unique_trials=False)
 
-        COP_automized_run.run_optuna_param_optimization()
-        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
+        # COP_automized_run.run_optuna_param_optimization()
+        # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
         COP_automized_run.combined_expected_graphs()

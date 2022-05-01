@@ -8,18 +8,18 @@ same class names as struct named defined within COP class in localsearch.h file.
 
 class VarData:
     def __init__(self):
-        self.ucPrio = None
+        self.ucPrio = 0
         self.valuesQ = np.zeros(shape=MAX_VALUES_OF_VAR, dtype=np.int64)
         self.valuesB = np.zeros(shape=MAX_VALUES_OF_VAR, dtype=np.int64)
         self.valuesP = np.zeros(shape=MAX_VALUES_OF_VAR, dtype=np.int64)
         self.valuesM = np.zeros(shape=MAX_VALUES_OF_VAR, dtype=np.int64)
-        self.valuesAmount = None
+        self.valuesAmount = 1
 
 
 class ValuesPerVars:
     def __init__(self):
         self.validVarAmount = 1
-        self.varsData = [VarData()] * MAX_NUM_OF_VARS
+        self.varsData = [VarData() for _ in range(MAX_NUM_OF_VARS)]
 
 
 class M:

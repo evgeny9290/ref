@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-
+import copy
 from structClasses import ValuesPerVars, M, MAX_NUM_OF_MS
 
 """
@@ -61,9 +61,10 @@ class Reader:
                     MS_file = np.array(f.read().split(), dtype=np.int64)
 
         maxValuesNum = MS_file[-2]
-
         MS_array_amounts = MS_file[:-2]
-        MS_class_array = [M()] * MAX_NUM_OF_MS
+
+        MS_class_array = [M() for _ in range(MAX_NUM_OF_MS)]  # correct
+
         for i in range(MAX_NUM_OF_MS):
             MS_class_array[i].amount = MS_array_amounts[i]
 
@@ -87,7 +88,6 @@ class Reader:
                 vpvFile = pd.read_csv(self.path + file, dtype=np.int64)
 
         list_of_valid_indexes = list(set(vpvFile['index']))
-
         for idx in list_of_valid_indexes:
             valid_info_for_idx = vpvFile[vpvFile['index'] == idx]
             self.valuesPerVariable.varsData[idx].valuesB = np.array(valid_info_for_idx['B'], dtype=np.int64)
@@ -98,8 +98,26 @@ class Reader:
             self.valuesPerVariable.varsData[idx].valuesAmount = np.int64(valid_info_for_idx['ulValuesAmount'].iloc[0])
 
 
-
-
+if __name__ == '__main__':
+    path = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\tests\\'
+    read_from = r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\CPP_Problems\\'
+    r = Reader(path=read_from, problem_seed=4326)
+    b_mat = r.binaryConstraintsMatrix
+    vpv = r.valuesPerVariable
+    mValNum, ms = r.maxValuesNum, r.MS
+    print(len(vpv.varsData))
+    # for x in vpv.varsData:
+    #     print(x.ucPrio)
+    # with open(path + 'test_bin_mat_4326.txt', 'w') as f:
+    #     for x in b_mat:
+    #         f.write(str(x))
+    #
+    # with open(read_from + 'BinaryConstraintsMatrix_4326.txt', 'r') as f:
+    #     data = "".join(f.read().split())
+    #
+    # with open(path + 'test_orig_bin_mat_4326.txt', 'w') as f:
+    #     for x in data:
+    #         f.write(str(x))
 
 
 

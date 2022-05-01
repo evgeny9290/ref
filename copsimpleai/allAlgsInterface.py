@@ -41,7 +41,6 @@ if __name__ == '__main__':
         start = time.time()
         result = greedy(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
         greedy_run_time = time.time() - start
-
         if sys.argv[1] != 'GREEDY' and sys.argv[1] != 'GREEDYLOOP':
             initial_solution = result
             run_time = float(run_time)

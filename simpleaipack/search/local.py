@@ -530,7 +530,6 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
             array_of_best_solutions_values.append((best, problem.value(best)))
         else:
             array_of_best_solutions_values.append((best, best.value))
-
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
         iteration += 1
 

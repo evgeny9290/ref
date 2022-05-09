@@ -529,7 +529,7 @@ def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, pytho
             label = name_arr[1]
         if '+' in col1:
             plt.plot(df[col2], df[col1], label=label, linestyle='-.', linewidth=1.5)
-        elif 'LOOP' in col1:
+        elif '+' and 'LOOP' in col1:
             plt.plot(df[col2], df[col1], label=label, linestyle=':', linewidth=1.5)
         else:
             plt.plot(df[col2], df[col1], label=label, linestyle='--', linewidth=1.5)

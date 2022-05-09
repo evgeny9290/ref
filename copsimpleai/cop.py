@@ -4,6 +4,8 @@ from structClasses import *
 
 import numpy as np
 from copy import deepcopy
+# from numba.experimental import jitclass
+# from numba import types
 
 """
 COP class inherits from SimpleAi SearchProblem module.
@@ -21,8 +23,19 @@ functions req for algorithms:
     6) random search: None.
 
 """
-
-
+# spec = [
+#     ('availableStatesSize', numba.int64),
+#     ('algoName', types.unicode_type),
+#     ('algoSeed', types.unicode_type),
+#     ('problemSeed', types.unicode_type),
+#     ('numOfVarChangesInNeighborhood', numba.int64),
+#     ('path', types.unicode_type),
+#     ('loadProblemFromFile', numba.boolean),
+#     ('initialSolution', SolutionVector.class_type.instance_type),
+#     ('reader', Reader.class_type.instance_type),
+# ]
+#
+# @jitclass(spec)
 class COP(SearchProblem):
     def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, algoName, algoSeed, initialSolution=None, loadProblemFromFile=True):
         """COP problem class. used to initialize COP problem and solve it using various local search algorithms.
@@ -55,21 +68,22 @@ class COP(SearchProblem):
         np.random.seed(problemSeed)
         self.initialSolution = SolutionVector() if initialSolution is None else initialSolution
 
-        if not loadProblemFromFile:
-            self.valuesPerVariables = ValuesPerVars()
-            self.binaryConstraintsMatrix = np.zeros(shape=MAX_TOTAL_VALUES * MAX_TOTAL_VALUES, dtype=np.int16)
-            self.maxValuesNum = None
-            self.Ms = [M()] * MAX_NUM_OF_MS
-            self.valuesPerVariablesInit()
-        else:
-            self.reader = Reader(self.path, self.problemSeed)
-            self.valuesPerVariables = self.reader.valuesPerVariable
-            padding_with_zeroes = MAX_TOTAL_VALUES * MAX_TOTAL_VALUES - len(self.reader.binaryConstraintsMatrix)
-            self.binaryConstraintsMatrix = np.pad(self.reader.binaryConstraintsMatrix, (0, padding_with_zeroes))
-            self.maxValuesNum = self.reader.maxValuesNum
-            self.Ms = self.reader.MS
+        # if not loadProblemFromFile:
+        #     self.valuesPerVariables = ValuesPerVars()
+        #     self.binaryConstraintsMatrix = np.zeros(shape=MAX_TOTAL_VALUES * MAX_TOTAL_VALUES, dtype=np.int64)
+        #     self.maxValuesNum = None
+        #     self.Ms = [M() for _ in range(MAX_NUM_OF_MS)]
+        #     self.valuesPerVariablesInit()
+        # else:
+        self.reader = Reader(self.path, self.problemSeed)
+        self.valuesPerVariables = self.reader.valuesPerVariable
+        padding_with_zeroes = MAX_TOTAL_VALUES * MAX_TOTAL_VALUES - len(self.reader.binaryConstraintsMatrix)
+        self.binaryConstraintsMatrix = np.pad(self.reader.binaryConstraintsMatrix, (0, padding_with_zeroes))
+        self.maxValuesNum = self.reader.maxValuesNum
+        self.Ms = self.reader.MS
 
         super().__init__(initial_state=self.initialSolution)
+
 
     @staticmethod
     def binConsIdx(x, y):
@@ -138,6 +152,7 @@ class COP(SearchProblem):
 
         return outputSolution
 
+    # @profile
     def evaluateSolution(self, solutionVec):
         """Evaluating the passed SolutionVector as GradesVector.
 
@@ -163,16 +178,18 @@ class COP(SearchProblem):
 
             for pastSolVar in range(currSolVar):
                 pastVal = solutionVec.solutionVector[pastSolVar]
-                assert(currSolVar*self.maxValuesNum + currVal <= MAX_TOTAL_VALUES and pastSolVar*self.maxValuesNum + pastVal <= MAX_TOTAL_VALUES)
+                # assert(currSolVar*self.maxValuesNum + currVal <= MAX_TOTAL_VALUES and pastSolVar*self.maxValuesNum + pastVal <= MAX_TOTAL_VALUES)  # wasted 15% of the time.
                 x = currSolVar*self.maxValuesNum + currVal
                 y = pastSolVar*self.maxValuesNum + pastVal
-                currBinaryVal = self.binaryConstraintsMatrix[self.binConsIdx(x, y)]
+                currBinaryVal = self.binaryConstraintsMatrix[x * MAX_TOTAL_VALUES + y]  # faster without function call
+                # currBinaryVal = self.binaryConstraintsMatrix[self.binConsIdx(x, y)]  # with function call
+
                 if currBinaryVal == 0:
                     currIsLegal = False
                     break
                 outputEvaluation.gradesVector[LEVEL_OF_BINARY_CONSTRAINTS] -= currBinaryVal
 
-            if currIsLegal:  # was -= for minimization. testing +=
+            if currIsLegal:
                 MsUsage[currM].amount -= 1
                 outputEvaluation.gradesVector[2 * currPrio] -= 1
                 outputEvaluation.gradesVector[2 * currPrio + 1] -= currP

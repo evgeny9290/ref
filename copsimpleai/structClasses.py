@@ -1,11 +1,39 @@
 from Constants import *
 import numpy as np
-
+from numba.experimental import jitclass
+from numba import types
 """
 same class names as struct named defined within COP class in localsearch.h file.
 """
+# varDataSpec = [
+#     ('ucPrio', numba.int64),
+#     ('valuesQ', numba.int64[:]),
+#     ('valuesB', numba.int64[:]),
+#     ('valuesP', numba.int64[:]),
+#     ('valuesM', numba.int64[:]),
+#     ('valuesAmount', numba.int64)
+# ]
 
+# vpvSpec = [
+#     ('validVarAmount', numba.int64),
+#     ('varsData', VarData.class_type.instance_type[:])
+# ]
 
+#
+# mSpec = [
+#     ('amount', numba.int64)
+# ]
+
+# solVecSpec = [
+#     ('solutionVector', numba.int64[:])
+# ]
+
+# gradeVecSpec = [
+#     ('valuesRange', numba.int64[:]),
+#     ('gradesVector', numba.int64[:])
+# ]
+
+# @jitclass(spec=varDataSpec)
 class VarData:
     def __init__(self):
         self.ucPrio = 0
@@ -16,12 +44,14 @@ class VarData:
         self.valuesAmount = 1
 
 
+# @jitclass(vpvSpec)
 class ValuesPerVars:
     def __init__(self):
         self.validVarAmount = 1
         self.varsData = [VarData() for _ in range(MAX_NUM_OF_VARS)]
 
 
+# @jitclass(mSpec)
 class M:
     def __init__(self):
         self.amount = None
@@ -30,6 +60,7 @@ class M:
         return f"M amount: {self.amount}"
 
 
+# @jitclass(spec=solVecSpec)
 class SolutionVector:
     def __init__(self):
         self.solutionVector = np.zeros(shape=MAX_NUM_OF_VARS, dtype=np.int64)
@@ -44,6 +75,7 @@ class SolutionVector:
         return not self.__lt__(other)
 
 
+# @jitclass(spec=gradeVecSpec)
 class GradesVector:
     def __init__(self):
         self.valuesRange = self.init_values_range()

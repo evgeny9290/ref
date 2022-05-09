@@ -23,8 +23,8 @@ if __name__ == '__main__':
     problem = None
     initial_solution = None
 
-    if sys.argv[1] in ['GREEDY', 'GREEDY+SHC', 'GREEDY+LBS', 'GREEDY+SA', 'GREEDY+RS', 'GREEDY+RW', 'GREEDYLOOP']:
-        if sys.argv[1] != 'GREEDY' and sys.argv[1] != 'GREEDYLOOP':
+    if sys.argv[1] in ['GREEDY', 'GREEDY+SHC', 'GREEDY+LBS', 'GREEDY+SA', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+LOOP']:
+        if sys.argv[1] != 'GREEDY':
             alg_name = 'InitialGreedy' + alg_name
 
         print("Greedy Search")
@@ -41,12 +41,27 @@ if __name__ == '__main__':
         start = time.time()
         result = greedy(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
         greedy_run_time = time.time() - start
-        if sys.argv[1] != 'GREEDY' and sys.argv[1] != 'GREEDYLOOP':
+        # print("greedy time elapse: ", greedy_run_time)
+        if sys.argv[1] != 'GREEDY':
             initial_solution = result
             run_time = float(run_time)
             run_time -= greedy_run_time
 
     alg_name = sys.argv[1]  # restore original alg name
+
+    if sys.argv[1] == 'GREEDY+LOOP':
+
+        print("GreedyLoop Search")
+        print("-----------------")
+
+        problem = COP(problemSeed=int(problem_seed),
+                      numOfVarChangesInNeighborhood=1,
+                      path=path,
+                      algoName=alg_name,
+                      algoSeed=algo_seed,
+                      initialSolution=initial_solution,
+                      loadProblemFromFile=True)
+        result = greedy(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
 
     if sys.argv[1] in ["RS", 'GREEDY+RS']:
         print("Random Search")
@@ -157,7 +172,7 @@ if __name__ == '__main__':
                       loadProblemFromFile=True)
         result = beam_best_first(problem, iterations_limit=max_iterations, max_run_time=float(run_time), seed=int(algo_seed))
 
-    if sys.argv[1] not in ["GREEDY", "GREEDYLOOP", "RS", "GREEDY+RS"]:
+    if sys.argv[1] not in ["GREEDY", "GREEDY+LOOP", "RS", "GREEDY+RS"]:
         print(f"Results for ParamILS: SAT, -1, {problem_seed}, {result.value}, {algo_seed}")
     else:
         print(f"Results for ParamILS: SAT, -1, {problem_seed}, {problem.value(result)}, {algo_seed}")

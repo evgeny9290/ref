@@ -1,14 +1,24 @@
 import numpy as np
 import pandas as pd
 import os
-import copy
 from structClasses import ValuesPerVars, M, MAX_NUM_OF_MS
 
 """
 class responsible for reading a COP problem Created into appropriate fields.
 """
+# from numba.experimental import jitclass
+# from numba import types
 
-
+# spec = [
+#     ('path', types.unicode_type),
+#     ('problem_seed', numba.int64),
+#     ('valuesPerVariable', ValuesPerVars.class_type.instance_type),
+#     ('binaryConstraintsMatrix', numba.int64[:]),
+#     ('maxValuesNum', numba.int64),
+#     ('MS', M.class_type.instance_type[:])
+# ]
+#
+# @jitclass(spec)
 class Reader:
     def __init__(self, path, problem_seed):
         """Creates Reader class for reading COP problem of for a given problem seed.

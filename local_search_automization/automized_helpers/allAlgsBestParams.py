@@ -26,7 +26,8 @@ optuna_parametrization_funcs = {'SLBS': stochastic_local_beam_search_optuna,
                                 'GREEDY+TS': tabu_search_optuna,
                                 'GREEDY+SA': simulated_annehiling_optuna,
                                 'GREEDY+CE': cross_entropy_optuna,
-                                'GREEDY+LBS': stochastic_local_beam_search_optuna}
+                                'GREEDY+LBS': stochastic_local_beam_search_optuna,
+                                'GREEDY+LOOP': random_search_or_greedy_optuna}
 
 
 class RepeatPruner(optuna.pruners.BasePruner):
@@ -125,7 +126,7 @@ def best_params_for_all_algos(path, output_path, algorithms, problem_seeds, algo
                 while num_iterations > len(set(str(t.params) for t in study.trials)):
                     study.optimize(run_optuna_func, n_trials=n_jobs, callbacks=[call_back_func], n_jobs=n_jobs)  # -1 means maximum cpu capacity
                     iter += n_jobs
-                    if algo in ['GREEDY', 'RS', 'GREEDYLOOP', 'GREEDY+RS'] and iter >= num_iterations:
+                    if algo in ['GREEDY', 'RS', 'GREEDY+LOOP', 'GREEDY+RS'] and iter >= num_iterations:
                         break
             else:
                 study.optimize(run_optuna_func, n_trials=num_iterations, callbacks=[call_back_func], n_jobs=n_jobs)

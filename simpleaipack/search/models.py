@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 class SearchProblem(object):
     '''Abstract base class to represent and manipulate the search space of a
        problem.

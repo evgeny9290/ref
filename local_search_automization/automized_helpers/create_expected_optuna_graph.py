@@ -119,7 +119,7 @@ def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_p
             label = name_arr[2]
         if '+' in label:
             plt.plot(df[col2], df[col1], label=label, linestyle='-.', linewidth=1.5)
-        elif 'LOOP' in label:
+        elif '+' and 'LOOP' in label:
             plt.plot(df[col2], df[col1], label=label, linestyle=':', linewidth=1.5)
         else:
             plt.plot(df[col2], df[col1], label=label, linestyle='--', linewidth=1.5)

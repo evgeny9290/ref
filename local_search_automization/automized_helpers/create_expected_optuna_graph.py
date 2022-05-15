@@ -132,8 +132,12 @@ def expected_graph_optuna_parametrization(expected_df_all_algs, python, graphs_p
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
     if python:
         plt.savefig(graphs_path + fr'Python_Expected_Graph_Optuna_all_algs.png')
+        plt.savefig(graphs_path + fr'Python_Expected_Graph_Optuna_all_algs.pdf')
+
     else:
         plt.savefig(graphs_path + fr'CPP_Expected_Graph_Optuna_all_algs.png')
+        plt.savefig(graphs_path + fr'CPP_Expected_Graph_Optuna_all_algs.pdf')
+
     plt.clf()
 
 

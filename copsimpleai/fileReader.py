@@ -7,7 +7,7 @@ from structClasses import ValuesPerVars, M, MAX_NUM_OF_MS
 class responsible for reading a COP problem Created into appropriate fields.
 """
 # from numba.experimental import jitclass
-# from numba import types
+# import numba
 
 # spec = [
 #     ('path', types.unicode_type),
@@ -73,7 +73,8 @@ class Reader:
         maxValuesNum = MS_file[-2]
         MS_array_amounts = MS_file[:-2]
 
-        MS_class_array = [M() for _ in range(MAX_NUM_OF_MS)]  # correct
+        MS_class_array = np.array([M() for _ in range(MAX_NUM_OF_MS)], dtype=object)  # correct
+        # MS_class_array = [M() for _ in range(MAX_NUM_OF_MS)]  # correct
 
         for i in range(MAX_NUM_OF_MS):
             MS_class_array[i].amount = MS_array_amounts[i]

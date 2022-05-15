@@ -1,12 +1,14 @@
-from simpleaipack.search import SearchProblem
-from fileReader import Reader
-from structClasses import *
+import time
+from copy import deepcopy
 
 import numpy as np
-from copy import deepcopy
-# from numba.experimental import jitclass
-# from numba import types
+from numba import njit
 
+from fileReader import Reader
+from simpleaipack.search import SearchProblem
+from structClasses import *
+from numba_accelerated_funcs import partial_eval_jitted_one, partial_eval_jitted_two, actions_jitted, scalarize_jitted,\
+                                    update_newState_solVec_jitted
 """
 COP class inherits from SimpleAi SearchProblem module.
 Responsible for:
@@ -23,21 +25,28 @@ functions req for algorithms:
     6) random search: None.
 
 """
+
+
 # spec = [
 #     ('availableStatesSize', numba.int64),
-#     ('algoName', types.unicode_type),
-#     ('algoSeed', types.unicode_type),
-#     ('problemSeed', types.unicode_type),
+#     ('algoName', numba.string),
+#     ('algoSeed', numba.string),
+#     ('problemSeed', numba.string),
 #     ('numOfVarChangesInNeighborhood', numba.int64),
-#     ('path', types.unicode_type),
+#     ('path', numba.string),
 #     ('loadProblemFromFile', numba.boolean),
 #     ('initialSolution', SolutionVector.class_type.instance_type),
 #     ('reader', Reader.class_type.instance_type),
+#     ('valuesPerVariables', ValuesPerVars.class_type.instance_type),
+#     ('binaryConstraintsMatrix', numba.int64[:]),
+#     ('maxValuesNum', numba.int64),
+#     ('Ms', M.class_type.instance_type[:]),
 # ]
 #
 # @jitclass(spec)
 class COP(SearchProblem):
-    def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, algoName, algoSeed, initialSolution=None, loadProblemFromFile=True):
+    def __init__(self, problemSeed, numOfVarChangesInNeighborhood, path, algoName, algoSeed, initialSolution=None,
+                 loadProblemFromFile=True):
         """COP problem class. used to initialize COP problem and solve it using various local search algorithms.
 
         Args:
@@ -84,20 +93,6 @@ class COP(SearchProblem):
 
         super().__init__(initial_state=self.initialSolution)
 
-
-    @staticmethod
-    def binConsIdx(x, y):
-        """Calculating the corresponding location for 1d array
-
-        Args:
-            x (int): row index
-            y (int): col index
-
-        Returns:
-             int: location inside 1d array.
-        """
-        return x * MAX_TOTAL_VALUES + y
-
     def valuesPerVariablesInit(self):
         """COP self initialization problem. python implementation for COP constructor from localsearch.h it cpp.
 
@@ -128,10 +123,9 @@ class COP(SearchProblem):
             for val1 in range(self.valuesPerVariables.varsData[var1].valuesAmount):
                 for var2 in range(self.valuesPerVariables.validVarAmount):
                     for val2 in range(self.valuesPerVariables.varsData[var2].valuesAmount):
-                        assert(var1 * self.maxValuesNum + val1 < MAX_TOTAL_VALUES and var2 * self.maxValuesNum + val2 < MAX_TOTAL_VALUES)
                         x = var1 * self.maxValuesNum + val1
                         y = var2 * self.maxValuesNum + val2
-                        self.binaryConstraintsMatrix[self.binConsIdx(x, y)] = np.random.randint(0, constraintsRatio)
+                        self.binaryConstraintsMatrix[x * MAX_TOTAL_VALUES + y] = np.random.randint(0, constraintsRatio)
 
     def generateSingleNeighbor(self, currentSolution):
         """Generating new SolutionVector randomized in numOfVarChangesInNeighborhood places from currentSolution.
@@ -152,7 +146,6 @@ class COP(SearchProblem):
 
         return outputSolution
 
-    # @profile
     def evaluateSolution(self, solutionVec):
         """Evaluating the passed SolutionVector as GradesVector.
 
@@ -163,44 +156,28 @@ class COP(SearchProblem):
         """
         outputEvaluation = GradesVector()
         MsUsage = deepcopy(self.Ms)
+
         for currSolVar in range(self.valuesPerVariables.validVarAmount):
             currIsLegal = True
-            currVal = solutionVec.solutionVector[currSolVar]
-            currM = self.valuesPerVariables.varsData[currSolVar].valuesM[currVal]
+            currVal, currM = partial_eval_jitted_one(currSolVar,
+                                                     solutionVec.solutionVector,
+                                                     self.valuesPerVariables.varsData[currSolVar].valuesM)
 
-            if MsUsage[currM].amount == 0:
-                continue
-
-            currPrio = self.valuesPerVariables.varsData[currSolVar].ucPrio
-            currB = self.valuesPerVariables.varsData[currSolVar].valuesB[currVal]
-            currQ = self.valuesPerVariables.varsData[currSolVar].valuesQ[currVal]
-            currP = self.valuesPerVariables.varsData[currSolVar].valuesP[currVal]
-
-            for pastSolVar in range(currSolVar):
-                pastVal = solutionVec.solutionVector[pastSolVar]
-                # assert(currSolVar*self.maxValuesNum + currVal <= MAX_TOTAL_VALUES and pastSolVar*self.maxValuesNum + pastVal <= MAX_TOTAL_VALUES)  # wasted 15% of the time.
-                x = currSolVar*self.maxValuesNum + currVal
-                y = pastSolVar*self.maxValuesNum + pastVal
-                currBinaryVal = self.binaryConstraintsMatrix[x * MAX_TOTAL_VALUES + y]  # faster without function call
-                # currBinaryVal = self.binaryConstraintsMatrix[self.binConsIdx(x, y)]  # with function call
-
-                if currBinaryVal == 0:
-                    currIsLegal = False
-                    break
-                outputEvaluation.gradesVector[LEVEL_OF_BINARY_CONSTRAINTS] -= currBinaryVal
-
-            if currIsLegal:
-                MsUsage[currM].amount -= 1
-                outputEvaluation.gradesVector[2 * currPrio] -= 1
-                outputEvaluation.gradesVector[2 * currPrio + 1] -= currP
-                outputEvaluation.gradesVector[LEVEL_OF_B] -= currB
-                outputEvaluation.gradesVector[LEVEL_OF_Q] -= currQ
+            partial_eval_jitted_two(currIsLegal, currSolVar, self.maxValuesNum, self.binaryConstraintsMatrix,
+                                    currVal,
+                                    outputEvaluation.gradesVector, solutionVec.solutionVector,
+                                    currM, MsUsage[currM].amount,
+                                    self.valuesPerVariables.varsData[currSolVar].ucPrio,
+                                    self.valuesPerVariables.varsData[currSolVar].valuesB,
+                                    self.valuesPerVariables.varsData[currSolVar].valuesQ,
+                                    self.valuesPerVariables.varsData[currSolVar].valuesP)
 
         return outputEvaluation
 
     def actions(self, state):
         """Generates self.availableStatesSize random 2-tuples.
         what index to change and into what number. because it is random it doesn't matter what is the current state.
+
 
         Args:
             state (SolutionVector): current state.
@@ -209,14 +186,10 @@ class COP(SearchProblem):
             list[list[(int, int)]]: a single action is performing self.numOfVarChangesInNeighborhood in current state.
                 and there are self.availableStatesSize such actions.
         """
-        actions = []
-        for action in range(self.availableStatesSize):  # change (rand_idx, rand_val)
-            change = []
-            for var in range(1, self.numOfVarChangesInNeighborhood + 1):
-                rand_entry = np.random.randint(0, self.valuesPerVariables.validVarAmount)
-                rand_val = np.random.randint(0, self.valuesPerVariables.varsData[rand_entry].valuesAmount)
-                change.append((rand_entry, rand_val))
-            actions.append(change)
+        actions = actions_jitted(self.availableStatesSize,
+                                 self.valuesPerVariables.validVarAmount,
+                                 self.numOfVarChangesInNeighborhood,
+                                 self.valuesPerVariables.extract_valuesAmount())
         return actions
 
     def result(self, state, action):
@@ -230,8 +203,7 @@ class COP(SearchProblem):
             SolutionVector: new state after performing an action on it.
         """
         newState = deepcopy(state)
-        for idx, val in action:
-            newState.solutionVector[idx] = val
+        newState.solutionVector = update_newState_solVec_jitted(np.array(action), newState.solutionVector)
         return newState
 
     def value(self, state):
@@ -244,7 +216,8 @@ class COP(SearchProblem):
             float: scalarized GradesVector resulted from applying self.evaluateSolution on input state.
         """
         evaluation = self.evaluateSolution(state)
-        return evaluation.scalarize()
+        scalar = scalarize_jitted(evaluation.gradesVector, evaluation.valuesRange)
+        return scalar
 
     def grade_value(self, state):
         return self.evaluateSolution(state)
@@ -260,30 +233,3 @@ class COP(SearchProblem):
         """
         return self.generateSingleNeighbor(self.initialSolution)
 
-
-# if __name__ == '__main__':
-#     problem = COP(problemSeed=3118,
-#                   numOfVarChangesInNeighborhood=5,
-#                   path=r'C:\Users\evgni\Desktop\projects_mine\ref\ref\copsimpleai\CPP_Problems\\',
-#                   algoName='GREEDY',
-#                   algoSeed='331991908',
-#                   initialSolution=None,
-#                   loadProblemFromFile=True)
-#
-#     x = [84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84,
-#          84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84,
-#          84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-#
-#     y = [82, 0, 0, 78, 44, 0, 0, 18, 9, 2, 0, 1, 0, 57, 67, 0, 28, 37, 3, 16, 0, 21, 64, 30, 48, 0, 11, 40, 64, 68, 17,
-#          39, 10, 66, 82, 7, 80, 23, 73, 15, 16, 22, 82, 61, 27, 46, 73, 67, 58, 68, 41, 44, 73, 71, 46, 77, 50, 58, 27,
-#          81, 23, 51, 14, 38, 5, 33, 4, 74, 21, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-#
-#     sv = SolutionVector()
-#     sv.solutionVector = x
-#     print(problem.evaluateSolution(sv))

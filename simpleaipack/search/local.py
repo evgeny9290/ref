@@ -9,7 +9,8 @@ import os
 from copy import deepcopy, copy
 from copsimpleai.structClasses import SolutionVector, GradesVector
 from copsimpleai.Constants import MAX_NUM_OF_VARS
-from numba import jit
+
+from numba import njit
 
 
 def _all_expander(fringe, iteration, viewer, problem):
@@ -36,13 +37,8 @@ def beam(problem, beam_size=100, iterations_limit=0, viewer=None):
     Requires: SearchProblem.actions, SearchProblem.result, SearchProblem.value,
     and SearchProblem.generate_random_state.
     '''
-    return _local_search(problem,
-                         _all_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=beam_size,
-                         random_initial_states=True,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer)
+    return _local_search(problem, _all_expander, iterations_limit=iterations_limit, fringe_size=beam_size,
+                         random_initial_states=True, stop_when_no_better=iterations_limit == 0, viewer=viewer)
 
 
 def _first_expander(fringe, iteration, viewer, problem):
@@ -82,13 +78,8 @@ def random_walk(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0
     SearchProblem.value.
     '''
     random.seed(seed)
-    return _local_search(problem,
-                         _random_walk_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
-                         max_run_time=max_run_time)
+    return _local_search(problem, _random_walk_expander, iterations_limit=iterations_limit, fringe_size=1,
+                         stop_when_no_better=iterations_limit == 0, viewer=viewer, max_run_time=max_run_time)
 
 
 def beam_best_first(problem, beam_size=100, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
@@ -103,13 +94,8 @@ def beam_best_first(problem, beam_size=100, iterations_limit=0, viewer=None, max
     SearchProblem.value.
     '''
     random.seed(seed)
-    return _local_search(problem,
-                         _first_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=beam_size,
-                         random_initial_states=True,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
+    return _local_search(problem, _first_expander, iterations_limit=iterations_limit, fringe_size=beam_size,
+                         random_initial_states=True, stop_when_no_better=iterations_limit == 0, viewer=viewer,
                          max_run_time=max_run_time)
 
 
@@ -123,12 +109,8 @@ def hill_climbing(problem, iterations_limit=0, viewer=None):
     Requires: SearchProblem.actions, SearchProblem.result, and
     SearchProblem.value.
     '''
-    return _local_search(problem,
-                         _first_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=True,
-                         viewer=viewer)
+    return _local_search(problem, _first_expander, iterations_limit=iterations_limit, fringe_size=1,
+                         stop_when_no_better=True, viewer=viewer)
 
 
 def _random_best_expander(fringe, iteration, viewer, problem):
@@ -161,17 +143,10 @@ def hill_climbing_stochastic(problem, iterations_limit=0, viewer=None, max_run_t
     SearchProblem.value.
     '''
     random.seed(seed)
-    return _local_search(problem,
-                         _random_best_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
-                         max_run_time=max_run_time)
+    return _local_search(problem, _random_best_expander, iterations_limit=iterations_limit, fringe_size=1,
+                         stop_when_no_better=iterations_limit == 0, viewer=viewer, max_run_time=max_run_time)
 
 
-# @jit(nopython=True)
-# @profile
 def _greedy_expander(cur_sol, iteration, cur_iter, problem):
     '''
     Expander that expands the best greedy choice for cur_iter.
@@ -194,9 +169,9 @@ def _greedy_expander(cur_sol, iteration, cur_iter, problem):
     flag = False
 
     if cur_iter >= problem.valuesPerVariables.validVarAmount:
-        if problem.algoName == "GREEDYLOOP":
-            # current_sol_vec = SolutionVector()
-            problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
+        if problem.algoName == "GREEDY+LOOP":
+            np.sort(problem.valuesPerVariables.varsData)
+            # problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
             cur_iter = 0
             flag = True
         else:
@@ -215,7 +190,7 @@ def _greedy_expander(cur_sol, iteration, cur_iter, problem):
 
     return best_sol_vec, 0  # 0 for normal greedy behaviour
 
-# @jit(nopython=True)
+
 def greedy(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
     '''
     greedy.
@@ -226,16 +201,12 @@ def greedy(problem, iterations_limit=0, viewer=None, max_run_time=1, seed=0):
     Requires: SearchProblem.actions, SearchProblem.result, and
     SearchProblem.value.
     '''
-    problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
+    np.sort(problem.valuesPerVariables.varsData)
+    # problem.valuesPerVariables.varsData.sort(key=lambda x: x.ucPrio)
     random.seed(seed)
 
-    return _local_search(problem,
-                         _greedy_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
-                         max_run_time=max_run_time)
+    return _local_search(problem, _greedy_expander, iterations_limit=iterations_limit, fringe_size=1,
+                         stop_when_no_better=iterations_limit == 0, viewer=viewer, max_run_time=max_run_time)
 
 
 def _random_search_expander(cur_sol, iteration, viewer, problem):
@@ -263,13 +234,8 @@ def random_search(problem, iterations_limit=0, viewer=None, max_run_time=1, seed
     '''
     random.seed(seed)
 
-    return _local_search(problem,
-                         _random_search_expander,
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
-                         max_run_time=max_run_time)
+    return _local_search(problem, _random_search_expander, iterations_limit=iterations_limit, fringe_size=1,
+                         stop_when_no_better=iterations_limit == 0, viewer=viewer, max_run_time=max_run_time)
 
 
 def hill_climbing_random_restarts(problem, restarts_limit, iterations_limit=0, viewer=None):
@@ -287,13 +253,8 @@ def hill_climbing_random_restarts(problem, restarts_limit, iterations_limit=0, v
     best = None
 
     while restarts < restarts_limit:
-        new = _local_search(problem,
-                            _first_expander,
-                            iterations_limit=iterations_limit,
-                            fringe_size=1,
-                            random_initial_states=True,
-                            stop_when_no_better=True,
-                            viewer=viewer)
+        new = _local_search(problem, _first_expander, iterations_limit=iterations_limit, fringe_size=1,
+                            random_initial_states=True, stop_when_no_better=True, viewer=viewer)
 
         if not best or best.value < new.value:
             best = new
@@ -307,6 +268,7 @@ def hill_climbing_random_restarts(problem, restarts_limit, iterations_limit=0, v
 
 
 # Math literally copied from aima-python
+@njit(cache=True, fastmath=True)
 def _exp_schedule(iteration, k=20, lam=0.005, limit=100):
     '''
     Possible scheduler for simulated_annealing, based on the aima example.
@@ -320,7 +282,6 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
     than the current (first) node, but that chance decreases with time.
     '''
     # random.seed(seed)
-
     def _expander(fringe, iteration, viewer, problem):
         T = schedule(iteration, k=initTemp, lam=tempStep)
         current = fringe[0]
@@ -332,8 +293,8 @@ def _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep):
         if neighbors:
             succ = random.choice(neighbors)
             delta_e = succ.value - current.value
-
-            if delta_e > 0 or random.random() < np.float64(math.exp(np.float64(-abs(delta_e / T)))):
+            res = 0 if T < 0.0001 else np.float64(math.exp(-abs(delta_e / T)))  # deals with overflow and zero division
+            if delta_e > 0 or random.random() < res:
                 fringe.pop()
                 fringe.append(succ)
 
@@ -360,13 +321,9 @@ def simulated_annealing(problem, schedule=_exp_schedule,
     SearchProblem.value.
     '''
     random.seed(seed)
-    return _local_search(problem,
-                         _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep),
-                         iterations_limit=iterations_limit,
-                         fringe_size=1,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer,
-                         max_run_time=max_run_time)
+    return _local_search(problem, _create_simulated_annealing_expander(schedule, seed, initTemp, tempStep),
+                         iterations_limit=iterations_limit, fringe_size=1, stop_when_no_better=iterations_limit == 0,
+                         viewer=viewer, max_run_time=max_run_time)
 
 
 def _create_genetic_expander(problem, mutation_chance):
@@ -424,13 +381,9 @@ def genetic(problem, population_size=100, mutation_chance=0.1,
     Requires: SearchProblem.generate_random_state, SearchProblem.crossover,
     SearchProblem.mutate and SearchProblem.value.
     '''
-    return _local_search(problem,
-                         _create_genetic_expander(problem, mutation_chance),
-                         iterations_limit=iterations_limit,
-                         fringe_size=population_size,
-                         random_initial_states=True,
-                         stop_when_no_better=iterations_limit==0,
-                         viewer=viewer)
+    return _local_search(problem, _create_genetic_expander(problem, mutation_chance), iterations_limit=iterations_limit,
+                         fringe_size=population_size, random_initial_states=True,
+                         stop_when_no_better=iterations_limit == 0, viewer=viewer)
 
 
 def writeResults(path, time_array, best_val_array, problem):
@@ -464,7 +417,6 @@ def writeResults(path, time_array, best_val_array, problem):
             f.write(str(value) + '\n')
 
 
-# @jit(nopython=True)
 def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
                   random_initial_states=False, stop_when_no_better=True,
                   viewer=None, max_run_time=1):
@@ -541,6 +493,7 @@ def _local_search(problem, fringe_expander, iterations_limit=0, fringe_size=1,
         else:
             array_of_best_solutions_values.append((best, best.value))
         array_of_times.append((stop - datetime.datetime.now()).total_seconds())
+
         iteration += 1
 
         if state == -2:

@@ -1,7 +1,5 @@
 from Constants import *
 import numpy as np
-from numba.experimental import jitclass
-from numba import types
 """
 same class names as struct named defined within COP class in localsearch.h file.
 """
@@ -25,7 +23,7 @@ same class names as struct named defined within COP class in localsearch.h file.
 # ]
 
 # solVecSpec = [
-#     ('solutionVector', numba.int64[:])
+#     ('solutionVector', int64[:])
 # ]
 
 # gradeVecSpec = [
@@ -43,15 +41,21 @@ class VarData:
         self.valuesM = np.zeros(shape=MAX_VALUES_OF_VAR, dtype=np.int64)
         self.valuesAmount = 1
 
+    def __lt__(self, other):
+        return self.ucPrio < other.ucPrio
 
-# @jitclass(vpvSpec)
+
+# @jitclass(spec=vpvSpec)
 class ValuesPerVars:
     def __init__(self):
         self.validVarAmount = 1
-        self.varsData = [VarData() for _ in range(MAX_NUM_OF_VARS)]
+        self.varsData = np.array([VarData() for _ in range(MAX_NUM_OF_VARS)], dtype=object)
+
+    def extract_valuesAmount(self):
+        return np.array([x.valuesAmount for x in self.varsData], dtype=np.int64)
 
 
-# @jitclass(mSpec)
+# @jitclass(spec=mSpec)
 class M:
     def __init__(self):
         self.amount = None
@@ -115,6 +119,5 @@ class GradesVector:
                              MAX_NUM_OF_VARS * 10,
                              MAX_NUM_OF_VARS * 1,
                              MAX_CONSTRAINTS_RATIO * (MAX_NUM_OF_VARS * MAX_NUM_OF_VARS - MAX_NUM_OF_VARS) // 2,
-                             MAX_NUM_OF_VARS * 1])
+                             MAX_NUM_OF_VARS * 1], dtype=np.int64)
         return init_arr
-

@@ -331,8 +331,11 @@ def graph_for_all_problems(all_probs_algs, problem_seeds, python, graphs_path, a
         plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
         if python:
             plt.savefig(graphs_path + fr'python_problem_num_{problem_seed}.png')
+            plt.savefig(graphs_path + fr'python_problem_num_{problem_seed}.pdf')
         else:
             plt.savefig(graphs_path + fr'CPP_problem_num_{problem_seed}.png')
+            plt.savefig(graphs_path + fr'CPP_problem_num_{problem_seed}.pdf')
+
         plt.clf()
 
 
@@ -543,8 +546,12 @@ def expected_graph_all_algs(same_dim_benchmark_after_normalize_fixed_time, pytho
     plt.legend(loc='center left', bbox_to_anchor=(0.96, 0.5))
     if python:
         plt.savefig(graphs_path + fr'Python_Expected_Graph.png')
+        plt.savefig(graphs_path + fr'Python_Expected_Graph.pdf')
+
     else:
         plt.savefig(graphs_path + fr'CPP_Expected_Graph.png')
+        plt.savefig(graphs_path + fr'CPP_Expected_Graph.pdf')
+
     plt.clf()
 
 

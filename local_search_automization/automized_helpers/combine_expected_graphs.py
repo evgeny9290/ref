@@ -86,8 +86,9 @@ def combined_expected_graph(cpp_dfs, py_dfs, graphs_path, algo_seed):
     plt.ylabel('quality', fontsize=18, rotation='horizontal')
     plt.title(f'Combined Expected Graph \n algo seed: {algo_seed}', fontsize=18)
     plt.legend(loc='center left', bbox_to_anchor=(0.90, 0.5))
-    plt.axvline(x=cpp_dfs[0].iloc[-2][1])  # represents the time where cpp algorithms stopped. only for CPP!
+    # plt.axvline(x=cpp_dfs[0].iloc[-2][1])  # represents the time where cpp algorithms stopped. only for CPP!
     plt.savefig(graphs_path + fr'Combined_Expected_Graph.png')
+    plt.savefig(graphs_path + fr'Combined_Expected_Graph.pdf')
     plt.clf()
 
 

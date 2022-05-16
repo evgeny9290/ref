@@ -2,6 +2,8 @@
 import heapq
 from collections import deque
 import random
+import numba
+
 try:
     from itertools import izip
 except ImportError:

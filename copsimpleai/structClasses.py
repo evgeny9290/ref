@@ -14,7 +14,7 @@ same class names as struct named defined within COP class in localsearch.h file.
 
 # vpvSpec = [
 #     ('validVarAmount', numba.int64),
-#     ('varsData', VarData.class_type.instance_type[:])
+#     ('varsData', typed.instance_type[:])
 # ]
 
 #
@@ -56,12 +56,12 @@ class ValuesPerVars:
 
 
 # @jitclass(spec=mSpec)
-class M:
-    def __init__(self):
-        self.amount = None
-
-    def __str__(self):
-        return f"M amount: {self.amount}"
+# class M:
+#     def __init__(self):
+#         self.amount = None
+#
+#     def __str__(self):
+#         return f"M amount: {self.amount}"
 
 
 # @jitclass(spec=solVecSpec)

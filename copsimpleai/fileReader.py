@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from structClasses import ValuesPerVars, M, MAX_NUM_OF_MS
+from structClasses import ValuesPerVars, MAX_NUM_OF_MS
 
 """
 class responsible for reading a COP problem Created into appropriate fields.
@@ -73,14 +73,17 @@ class Reader:
         maxValuesNum = MS_file[-2]
         MS_array_amounts = MS_file[:-2]
 
-        MS_class_array = np.array([M() for _ in range(MAX_NUM_OF_MS)], dtype=object)  # correct
+        # MS_class_array = np.array([M() for _ in range(MAX_NUM_OF_MS)], dtype=object)  # correct
+        # MS_class_array = np.zeros(shape=MAX_NUM_OF_MS, dtype=np.int64)  # correct
+
         # MS_class_array = [M() for _ in range(MAX_NUM_OF_MS)]  # correct
 
-        for i in range(MAX_NUM_OF_MS):
-            MS_class_array[i].amount = MS_array_amounts[i]
+        # for i in range(MAX_NUM_OF_MS):
+        #     MS_class_array[i].amount = MS_array_amounts[i]
 
         self.valuesPerVariable.validVarAmount = MS_file[-1]
-        return maxValuesNum, MS_class_array
+        # return maxValuesNum, MS_class_array
+        return maxValuesNum, MS_array_amounts
 
     def ValuesPerVariable_reader(self):
         """Reading ValuesPerVariable_ cvs file as DataFrame.

@@ -60,16 +60,14 @@ def partial_eval_jitted_one(currSolVar: int, solutionVector: np.array, valuesM: 
     currVal = solutionVector[currSolVar]
     currM = valuesM[currVal]
 
-    # Test
-
     return currVal, currM
 
 
 @njit(cache=True, fastmath=True)
 def partial_eval_jitted_two(currIsLegal: bool, currSolVar: int, maxValuesNum: int, binaryConstraintsMatrix: np.array,
                             currVal: int, gradesVector: np.array, solutionVector: np.array,
-                            currM: np.array, amount: int, testPrio:int,
-                            testvaluesB: np.array, testvaluesQ: np.array, testvaluesP: np.array):
+                            currM: np.array, amount: int, var_data_prio: int,
+                            var_data_valuesB: np.array, var_data_valuesQ: np.array, var_data_valuesP: np.array):
     """Evaluating the critical part of the Evaluation function.
        using numba to speed things up.
 
@@ -81,15 +79,21 @@ def partial_eval_jitted_two(currIsLegal: bool, currSolVar: int, maxValuesNum: in
         currVal (int): current value in solution vector.
         gradesVector (List[int]): Grades numpy 1d vector
         solutionVector (List[int]): Solution numpy 1d vector.
+        currM (ndarray):
+        amount (int):
+        var_data_prio (int):
+        var_data_valuesB (ndarray):
+        var_data_valuesQ (ndarray):
+        var_data_valuesP (ndarray):
 
     Returns:
         currIsLegal (bool): True if current variable is legal, else False.
     """
     if amount:
-        currPrio = testPrio
-        currB = testvaluesB[currVal]
-        currQ = testvaluesQ[currVal]
-        currP = testvaluesP[currVal]
+        currPrio = var_data_prio
+        currB = var_data_valuesB[currVal]
+        currQ = var_data_valuesQ[currVal]
+        currP = var_data_valuesP[currVal]
 
         for pastSolVar in range(currSolVar):
             pastVal = solutionVector[pastSolVar]

@@ -155,7 +155,7 @@ class COP(SearchProblem):
             GradesVector: evaluation of passed SolutionVector.
         """
         outputEvaluation = GradesVector()
-        MsUsage = deepcopy(self.Ms)
+        MsUsage = np.copy(self.Ms)
 
         for currSolVar in range(self.valuesPerVariables.validVarAmount):
             currIsLegal = True
@@ -166,7 +166,7 @@ class COP(SearchProblem):
             partial_eval_jitted_two(currIsLegal, currSolVar, self.maxValuesNum, self.binaryConstraintsMatrix,
                                     currVal,
                                     outputEvaluation.gradesVector, solutionVec.solutionVector,
-                                    currM, MsUsage[currM].amount,
+                                    currM, MsUsage[currM],
                                     self.valuesPerVariables.varsData[currSolVar].ucPrio,
                                     self.valuesPerVariables.varsData[currSolVar].valuesB,
                                     self.valuesPerVariables.varsData[currSolVar].valuesQ,

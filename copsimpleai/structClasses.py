@@ -56,12 +56,12 @@ class ValuesPerVars:
 
 
 # @jitclass(spec=mSpec)
-class M:
-    def __init__(self):
-        self.amount = None
-
-    def __str__(self):
-        return f"M amount: {self.amount}"
+# class M:
+#     def __init__(self):
+#         self.amount = None
+#
+#     def __str__(self):
+#         return f"M amount: {self.amount}"
 
 
 # @jitclass(spec=solVecSpec)

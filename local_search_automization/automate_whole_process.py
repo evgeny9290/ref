@@ -245,9 +245,10 @@ class COPLocalSearchAlgorithmsAveraging:
                                           self.python_dataframes_path + f"expected_dataframes/",
                                           self.graphs_path, self.algo_seed)
 
+
 if __name__ == '__main__':
-    # algo_seeds = ['331991908', '222991908', '191190833']
-    algo_seeds = ['331991908']
+    # algo_seeds = ['222991908', '191190833']
+    algo_seeds = ['222991908']
 
     for algo_seed in algo_seeds:
         problemCreatorPath = r'../LocalSearchProblemGenerator/Debug/LocalSearchProblemGenerator.exe'
@@ -260,9 +261,9 @@ if __name__ == '__main__':
         best_params_path = rf'../copsimpleai/LocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
         python_dataframes_path = rf'../copsimpleai/python_dataframes/algo_seed_{algo_seed}/'
 
-        alg_run_time = 120.0
-        optuna_run_time = 10.0
-        num_iterations = 24  # used for optuna as number of trials, has to be accurate
+        alg_run_time = 60.0
+        optuna_run_time = 1.0
+        num_iterations = 6  # used for optuna as number of trials, has to be accurate
 
         problem_set = ['3118', '641233', '632142']  # small test
         # problem_set = ['632142']  # small test
@@ -279,7 +280,7 @@ if __name__ == '__main__':
         # algorithms = ['SLBS', 'RS', 'RW', 'SHC', 'GREEDY', 'TS', 'SA', 'CE',
         #               'GREEDY+SLBS', 'GREEDY+RS', 'GREEDY+RW', 'GREEDY+SHC', 'GREEDYLOOP',
         #               'GREEDY+TS', 'GREEDY+SA', 'GREEDY+CE']
-        num_workers = 5
+        num_workers = 4
 
         algorithms = ['RS', 'RW', 'SHC', 'SA', 'GREEDY', 'GREEDYLOOP',
                       'GREEDY+SA', 'GREEDY+SHC']
@@ -305,8 +306,8 @@ if __name__ == '__main__':
                                                               unique_trials=False)
 
         COP_automized_run.generate_problems_from_seeds()
-        COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=True)  # if optimal params already exist run this
+        # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+        # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=True)  # if optimal params already exist run this
 
         python_results_path = r'../copsimpleai/pythonLocalSearch/Results/'
         python_run_file = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/python_final_run.txt'
@@ -314,9 +315,9 @@ if __name__ == '__main__':
         python_path_best_args = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/best_values_for_algs/'
         python_best_params_path = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
 
-        python_alg_run_time = 360.0
-        python_optuna_run_time = 60.0
-        python_num_iterations = 24
+        python_alg_run_time = 60.0
+        python_optuna_run_time = 10.0
+        python_num_iterations = 6
         python_algo_seed = algo_seed
 
         python_problem_set = ['3118', '641233', '632142']  # small test
@@ -331,8 +332,7 @@ if __name__ == '__main__':
         python_algs = ['GREEDY+LOOP', 'RS', 'RW', 'SHC', 'SA', 'GREEDY',
                       'GREEDY+SA', 'GREEDY+SHC']
 
-
-        python_num_workers = 5
+        python_num_workers = 4
 
         COP_automized_run = COPLocalSearchAlgorithmsAveraging(problemGenerator_exe_path=problemCreatorPath,
                                                               results_path=python_results_path,
@@ -355,5 +355,5 @@ if __name__ == '__main__':
                                                               unique_trials=False)
 
         COP_automized_run.run_optuna_param_optimization()
-        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=True)  # if optimal params already exist run this
+        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
         COP_automized_run.combined_expected_graphs()

@@ -2,7 +2,7 @@ import os
 import sys
 import time
 # need to append the simpleaipack into sys.path so python interpreter will detect it.
-sys.path.append(r'C:\Users\evgni\Desktop\projects_mine\ref\ref')
+sys.path.append(r'C:\Users\Evgeny\Desktop\projects_mine\ref\ref')
 from cop import COP
 from simpleaipack.search.local import beam_best_first, hill_climbing_stochastic, simulated_annealing, greedy\
                                      , random_walk, random_search

@@ -247,8 +247,8 @@ class COPLocalSearchAlgorithmsAveraging:
 
 
 if __name__ == '__main__':
-    # algo_seeds = ['222991908', '191190833']
-    algo_seeds = ['222991908']
+    algo_seeds = ['222991908', '191190833']
+    # algo_seeds = ['191190833']
 
     for algo_seed in algo_seeds:
         problemCreatorPath = r'../LocalSearchProblemGenerator/Debug/LocalSearchProblemGenerator.exe'
@@ -261,9 +261,9 @@ if __name__ == '__main__':
         best_params_path = rf'../copsimpleai/LocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
         python_dataframes_path = rf'../copsimpleai/python_dataframes/algo_seed_{algo_seed}/'
 
-        alg_run_time = 60.0
-        optuna_run_time = 1.0
-        num_iterations = 6  # used for optuna as number of trials, has to be accurate
+        alg_run_time = 10.0
+        optuna_run_time = 10.0
+        num_iterations = 24  # used for optuna as number of trials, has to be accurate
 
         problem_set = ['3118', '641233', '632142']  # small test
         # problem_set = ['632142']  # small test
@@ -306,8 +306,8 @@ if __name__ == '__main__':
                                                               unique_trials=False)
 
         COP_automized_run.generate_problems_from_seeds()
-        # COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
-        # COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=True)  # if optimal params already exist run this
+        COP_automized_run.run_optuna_param_optimization()  # run this if first you want to know the optimal params
+        COP_automized_run.find_best_params_run_then_output_expected_graphs(print_graphs_bool=True, ran_optimal_params=False)  # if optimal params already exist run this
 
         python_results_path = r'../copsimpleai/pythonLocalSearch/Results/'
         python_run_file = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/python_final_run.txt'
@@ -315,9 +315,9 @@ if __name__ == '__main__':
         python_path_best_args = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/best_values_for_algs/'
         python_best_params_path = fr'../copsimpleai/pythonLocalSearch/algo_seed_{algo_seed}/BestParamsPerAlgo/'
 
-        python_alg_run_time = 60.0
+        python_alg_run_time = 10.0
         python_optuna_run_time = 10.0
-        python_num_iterations = 6
+        python_num_iterations = 24
         python_algo_seed = algo_seed
 
         python_problem_set = ['3118', '641233', '632142']  # small test
@@ -330,7 +330,7 @@ if __name__ == '__main__':
         #                       '3786', '3791', '4160', '4233', '4273', '4326', '4430', '4620', '4952']  # big test
         # python_algs = ['GREEDY+SA', 'GREEDY+LOOP', 'GREEDY', 'GREEDY+SHC', 'GREEDY+RW', 'GREEDY+RS']
         python_algs = ['GREEDY+LOOP', 'RS', 'RW', 'SHC', 'SA', 'GREEDY',
-                      'GREEDY+SA', 'GREEDY+SHC']
+                      'GREEDY+SA', 'GREEDY+SHC', 'GREEDY+LBS', 'LBS']
 
         python_num_workers = 4
 

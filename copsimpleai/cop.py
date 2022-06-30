@@ -143,7 +143,6 @@ class COP(SearchProblem):
             randIntForVar = np.random.randint(0, self.valuesPerVariables.validVarAmount)
             randIntForVal = np.random.randint(0, self.valuesPerVariables.varsData[randIntForVar].valuesAmount)
             outputSolution.solutionVector[randIntForVar] = randIntForVal
-
         return outputSolution
 
     def evaluateSolution(self, solutionVec):

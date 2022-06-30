@@ -24,7 +24,32 @@
 #
 # def x():
 #     return 1,2
-# if __name__ == '__main__':
+
+def func(A, L, K):
+    for i in range(1, len(A)):
+        A[i] += A[i-1]
+
+    res = A[L + K - 1]
+    maxL = A[L - 1]
+    maxM = A[K - 1]
+
+    for i in range(K+L, len(A)):
+        maxL = max(maxL, A[i - K] - A[i - K - L])
+        maxK = max(maxM, A[i - L] - A[i - L - K])
+        res = max(res, maxL + (A[i] - A[i - K]), maxK + (A[i] - A[i - L]))
+
+    return res
+
+
+if __name__ == '__main__':
+    A = [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]
+    K = 3
+    L = 2
+    print(func(A, L, K))
+
+
+
+
 #     print(type(x()))
 #     if type(x()) is tuple:
 #         print("asasassasasaas")
